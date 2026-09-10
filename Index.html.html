@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuChou Pet — Rede Social de Pets Perdidos e Achados</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf4f0',
+                            100: '#fbe8e1',
+                            500: '#e07a5f',
+                            600: '#cc6548',
+                            700: '#ab5036',
+                            800: '#8c422c'
+                        },
+                        accent: {
+                            50: '#f4f6f0',
+                            500: '#81b29a',
+                            600: '#68947d'
+                        },
+                        darkBg: '#1f2937',
+                        darkCard: '#111827'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .transition-all-300 { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 font-sans text-slate-800 flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="appState.navigate('feed')">
+                    <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-paw text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-brand-600 to-amber-600 bg-clip-text text-transparent">AuChou</span>
+                        <span class="text-xs block font-medium text-slate-500 uppercase tracking-widest">Pets Perdidos & Achados</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <button onclick="appState.navigate('feed')" class="text-slate-600 hover:text-brand-600 font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-newspaper"></i> Feed
+                    </button>
+                    <button id="nav-my-alerts" onclick="appState.navigate('my-alerts')" class="hidden text-slate-600 hover:text-brand-600 font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn"></i> Meus Alertas
+                    </button>
+                    <button id="nav-chat" onclick="appState.navigate('chat')" class="hidden text-slate-600 hover:text-brand-600 font-medium transition flex items-center gap-2 relative">
+                        <i class="fa-solid fa-comments"></i> Chat Privado
+                        <span id="chat-badge" class="absolute -top-1 -right-2 bg-brand-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </button>
+                    <button id="nav-admin" onclick="appState.navigate('admin')" class="hidden text-amber-600 hover:text-amber-700 font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> Painel Admin
+                    </button>
+                </div>
+
+                <!-- User Account / Auth Prominent Buttons -->
+                <div class="flex items-center space-x-3" id="auth-header-container">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Wrapper -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- ================= FEED VIEW ================= -->
+        <div id="view-feed" class="view-section space-y-6">
+            <!-- Hero banner for visitors/users -->
+            <div class="bg-gradient-to-r from-brand-500 to-amber-500 rounded-2xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <h1 class="text-2xl md:text-4xl font-bold">Unindo corações e trazendo pets para casa</h1>
+                    <p class="text-white/90 text-sm md:text-base max-w-xl">Plataforma segura de pets perdidos e achados com comunicação privada via chat, sem exposição de números de telefone.</p>
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button onclick="checkAuthAndOpenCreatePost()" class="bg-white text-brand-600 font-semibold px-5 py-3 rounded-xl shadow hover:bg-slate-100 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-lg"></i> Publicar Alerta
+                    </button>
+                    <div id="hero-auth-actions" class="flex gap-2">
+                        <!-- Populated by JS for visitors -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Search Bar -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
+                <div class="lg:col-span-2 relative">
+                    <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
+                    <input type="text" id="filter-search" oninput="appState.filterPosts()" placeholder="Pesquisar por raça, nome, cor ou local..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+                <div>
+                    <select id="filter-category" onchange="appState.filterPosts()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Cão Perdido">Cão Perdido</option>
+                        <option value="Cão Achado">Cão Achado</option>
+                        <option value="Gato Perdido">Gato Perdido</option>
+                        <option value="Gato Achado">Gato Achado</option>
+                        <option value="Outros Pets">Outros Pets (Perdido/Achado)</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filter-status" onchange="appState.filterPosts()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        <option value="">Todos os Status</option>
+                        <option value="Procurando">Procurando</option>
+                        <option value="Encontrado / Reunido">Encontrado / Reunido</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="appState.resetFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Limpar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feed Grid & Sidebar Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Posts Feed (2 cols) -->
+                <div class="lg:col-span-2 space-y-6" id="posts-feed-container">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Sidebar (1 col) -->
+                <div class="space-y-6">
+                    <!-- Quick Login / Register Box for Visitors -->
+                    <div id="sidebar-auth-box" class="bg-gradient-to-br from-brand-50 to-amber-50 p-5 rounded-2xl border border-brand-200 shadow-sm space-y-3">
+                        <h3 class="font-bold text-brand-800 flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-brand-600"></i> Participe da Comunidade
+                        </h3>
+                        <p class="text-xs text-brand-900 leading-relaxed">
+                            Cadastre-se gratuitamente para publicar alertas, curtir, comentar e conversar por chat privado sem expor seu telefone.
+                        </p>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="openAuthModal('login')" class="bg-white border border-brand-300 hover:bg-brand-100 text-brand-700 font-semibold py-2 rounded-xl text-xs transition">
+                                Entrar
+                            </button>
+                            <button onclick="openAuthModal('register')" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2 rounded-xl text-xs shadow transition">
+                                Cadastrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Community Stats Widget -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-brand-500"></i> Estatísticas da Rede
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="bg-brand-50 p-3 rounded-xl">
+                                <span id="stat-total-pets" class="block text-2xl font-bold text-brand-600">0</span>
+                                <span class="text-xs text-slate-500 font-medium">Pets Cadastrados</span>
+                            </div>
+                            <div class="bg-emerald-50 p-3 rounded-xl">
+                                <span id="stat-reunited" class="block text-2xl font-bold text-emerald-600">0</span>
+                                <span class="text-xs text-slate-500 font-medium">Reunidos com Família</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Safety & Privacy Notice -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-dog text-amber-500"></i> Privacidade em Primeiro Lugar
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Para sua segurança, o AuChou não expõe telefones ou WhatsApp nas publicações. Use nosso <strong>Chat Interno Privado</strong> para negociar o resgate do pet com segurança.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MY ALERTS VIEW ================= -->
+        <div id="view-my-alerts" class="view-section hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-brand-500"></i> Meus Alertas Publicados
+                    </h1>
+                    <p class="text-slate-500 text-sm">Gerencie, edite ou atualize o status dos seus avisos de pets perdidos ou achados.</p>
+                </div>
+                <button onclick="openPostModal()" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Alerta
+                </button>
+            </div>
+            <div id="my-alerts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <!-- ================= CHAT VIEW ================= -->
+        <div id="view-chat" class="view-section hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden grid grid-cols-1 md:grid-cols-3 h-[75vh]">
+                <!-- Chat Contacts Sidebar -->
+                <div class="border-r border-slate-200 flex flex-col bg-slate-50/50">
+                    <div class="p-4 border-b border-slate-200 font-bold text-slate-800 flex items-center justify-between">
+                        <span>Conversas Seguras</span>
+                        <span id="chat-count-badge" class="bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="chat-conversations-list" class="overflow-y-auto flex-grow divide-y divide-slate-100">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+                <!-- Active Chat Area -->
+                <div class="md:col-span-2 flex flex-col bg-white" id="chat-active-area">
+                    <div class="flex-grow flex flex-col items-center justify-center p-8 text-center text-slate-400">
+                        <i class="fa-solid fa-comments text-5xl mb-3 text-slate-300"></i>
+                        <p class="font-medium text-slate-600">Selecione uma conversa ao lado</p>
+                        <p class="text-xs text-slate-400 mt-1">Converse com outros tutores com total privacidade, sem expor seu telefone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PROFILE VIEW ================= -->
+        <div id="view-profile" class="view-section hidden max-w-2xl mx-auto space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                <div class="flex items-center space-x-4 border-b border-slate-100 pb-6">
+                    <div class="w-20 h-20 bg-brand-100 text-brand-700 font-bold rounded-2xl flex items-center justify-center text-3xl shadow-inner overflow-hidden" id="profile-avatar-preview">
+                        <!-- Avatar initial or image -->
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800" id="profile-display-name">Nome do Usuário</h1>
+                        <p class="text-slate-500 text-sm" id="profile-display-email">email@exemplo.com</p>
+                        <span class="inline-block mt-2 bg-brand-50 text-brand-700 text-xs px-2.5 py-1 rounded-full font-semibold">Tutor Cadastrado</span>
+                    </div>
+                </div>
+
+                <form id="profile-form" onsubmit="handleProfileUpdate(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
+                        <input type="text" id="prof-name" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Região / Bairro</label>
+                            <input type="text" id="prof-region" placeholder="Ex: Centro, Bairro Alto" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">URL da Foto de Perfil</label>
+                            <input type="url" id="prof-avatar" placeholder="https://exemplo.com/foto.jpg" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Bio / Sobre mim</label>
+                        <textarea id="prof-bio" rows="3" placeholder="Conte um pouco sobre seu amor pelos animais..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow transition text-sm">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN VIEW ================= -->
+        <div id="view-admin" class="view-section hidden space-y-6">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-amber-400"></i> Painel do Administrador
+                    </h1>
+                    <p class="text-slate-300 text-sm mt-1">Moderação de conteúdos, gerenciamento de usuários e relatórios da plataforma AuChou.</p>
+                </div>
+                <button onclick="adminLogout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair do Admin
+                </button>
+            </div>
+
+            <!-- Admin KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-1">
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total de Pets</span>
+                    <span id="adm-stat-posts" class="block text-3xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-1">
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Alertas Ativos</span>
+                    <span id="adm-stat-active" class="block text-3xl font-bold text-amber-600">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-1">
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Reunidos</span>
+                    <span id="adm-stat-reunited" class="block text-3xl font-bold text-emerald-600">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-1">
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Usuários</span>
+                    <span id="adm-stat-users" class="block text-3xl font-bold text-blue-600">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-1">
+                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Mensagens Chat</span>
+                    <span id="adm-stat-messages" class="block text-3xl font-bold text-purple-600">0</span>
+                </div>
+            </div>
+
+            <!-- Moderation Tabs / Content -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4 bg-slate-50">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-slate-800"><i class="fa-solid fa-list-check text-brand-500"></i> Moderação de Publicações</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="text" id="admin-search" oninput="renderAdminTable()" placeholder="Pesquisar posts..." class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                                <th class="p-4">Pet / Categoria</th>
+                                <th class="p-4">Tutor</th>
+                                <th class="p-4">Local / Data</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-posts-tbody" class="divide-y divide-slate-100">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-semibold text-slate-700">AuChou Pet &copy; 2026 — Rede Social de Pets Perdidos e Achados</p>
+            <p>Desenvolvido para resgate seguro com foco na privacidade de tutores e cidadãos.</p>
+            <div class="pt-2">
+                <button onclick="openAdminLoginModal()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium">Acesso Administrativo (Moderação)</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Auth Modal (Login / Register) -->
+    <div id="modal-auth" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div class="p-6 bg-gradient-to-r from-brand-500 to-amber-500 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fa-solid fa-paw text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 id="auth-modal-title" class="text-xl font-bold">Entrar no AuChou</h3>
+                        <p class="text-xs text-white/90">Proteja seus dados e interaja com a comunidade</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-auth')" class="text-white/80 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="p-6 space-y-4">
+                <div id="auth-name-group" class="hidden">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
+                    <input type="text" id="auth-name" placeholder="Seu nome" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail</label>
+                    <input type="email" id="auth-email" required placeholder="seu@email.com" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                </div>
+                <div id="auth-error-msg" class="text-xs text-red-500 font-medium hidden"></div>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl shadow transition text-sm">
+                    Entrar
+                </button>
+                <div class="text-center pt-2">
+                    <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs font-medium text-brand-600 hover:underline">
+                        Não tem uma conta? Cadastre-se agora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="modal-admin-login" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Acesso Administrativo</h3>
+                        <p class="text-xs text-slate-400">Área restrita de moderação</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form onsubmit="handleAdminLoginSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Usuário Admin</label>
+                    <input type="text" id="adm-login-user" required placeholder="admin" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-sm" value="admin">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Senha Admin</label>
+                    <input type="password" id="adm-login-pass" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:outline-none text-sm" value="123456">
+                </div>
+                <div class="text-[11px] text-slate-400">Dica padrão: usuário <b>admin</b> e senha <b>123456</b></div>
+                <div id="adm-login-error" class="text-xs text-red-500 font-medium hidden">Usuário ou senha incorretos.</div>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl shadow transition text-sm">
+                    Entrar no Painel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create / Edit Post Modal -->
+    <div id="modal-post" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100">
+            <div class="p-6 bg-gradient-to-r from-brand-500 to-amber-500 text-white flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fa-solid fa-bullhorn text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 id="post-modal-title" class="text-xl font-bold">Publicar Alerta de Pet</h3>
+                        <p class="text-xs text-white/90">Ajude a comunidade a encontrar este animal</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-post')" class="text-white/80 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="post-form" onsubmit="handlePostSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="edit-post-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Categoria do Alerta *</label>
+                        <select id="post-category" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                            <option value="">Selecione...</option>
+                            <option value="Cão Perdido">Cão Perdido</option>
+                            <option value="Cão Achado">Cão Achado</option>
+                            <option value="Gato Perdido">Gato Perdido</option>
+                            <option value="Gato Achado">Gato Achado</option>
+                            <option value="Outros Pets">Outros Pets (Perdido/Achado)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Status do Anúncio *</label>
+                        <select id="post-status" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                            <option value="Procurando">Procurando</option>
+                            <option value="Encontrado / Reunido">Encontrado / Reunido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nome do Pet (se conhecido)</label>
+                        <input type="text" id="post-pet-name" placeholder="Ex: Mel" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Raça *</label>
+                        <input type="text" id="post-breed" required placeholder="Ex: Poodle, SRD" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Porte e Cor *</label>
+                        <input type="text" id="post-color-size" required placeholder="Ex: Médio, Bege e Branco" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Data e Horário *</label>
+                        <input type="datetime-local" id="post-datetime" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Local Aproximado (Bairro/Cidade) *</label>
+                        <input type="text" id="post-location" required placeholder="Ex: Bairro Jardim América, São Paulo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL da Foto do Pet *</label>
+                    <input type="url" id="post-image" required placeholder="https://images.unsplash.com/photo-..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    <p class="text-[11px] text-slate-400 mt-1">Insira o link direto de uma foto clara do animal.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Características Marcantes e Descrição *</label>
+                    <textarea id="post-description" rows="3" required placeholder="Descreva coleira, cicatrizes, comportamento, roupas..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm"></textarea>
+                </div>
+
+                <div id="post-error-msg" class="text-xs text-red-500 font-medium hidden"></div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-post')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold px-5 py-2.5 rounded-xl transition text-sm">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow transition text-sm">
+                        Publicar Alerta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script>
+        /* ================= STORAGE & INITIAL DATA ================= */
+        const STORAGE_KEYS = {
+            USERS: 'auchou_users',
+            POSTS: 'auchou_posts',
+            COMMENTS: 'auchou_comments',
+            MESSAGES: 'auchou_messages',
+            CURRENT_USER: 'auchou_current_user',
+            ADMIN_LOGGED: 'auchou_admin_logged'
+        };
+
+        // Seed initial data if empty
+        function initializeStorage() {
+            if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
+                const defaultUsers = [
+                    { id: 'u1', name: 'Ana Souza', email: 'ana@email.com', password: '123', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', bio: 'Amante de cães e resgatadora independente.', region: 'Centro' },
+                    { id: 'u2', name: 'Carlos Lima', email: 'carlos@email.com', password: '123', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', bio: 'Tutor do Bob. Ajudo animais perdidos.', region: 'Jardins' }
+                ];
+                localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultUsers));
+            }
+
+            if (!localStorage.getItem(STORAGE_KEYS.POSTS)) {
+                const defaultPosts = [
+                    {
+                        id: 'p1',
+                        userId: 'u1',
+                        userName: 'Ana Souza',
+                        userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+                        category: 'Cão Perdido',
+                        status: 'Procurando',
+                        petName: 'Thor',
+                        breed: 'Golden Retriever',
+                        colorSize: 'Grande, Pelagem Dourada',
+                        datetime: '2026-03-08T14:30',
+                        location: 'Bairro Jardins, São Paulo',
+                        image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=600',
+                        description: 'Thor fugiu assustado com fogos de artifício. Usa coleira azul com plaqueta de identificação e é muito dócil.',
+                        likes: ['u2'],
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'p2',
+                        userId: 'u2',
+                        userName: 'Carlos Lima',
+                        userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+                        category: 'Gato Achado',
+                        status: 'Encontrado / Reunido',
+                        petName: 'Desconhecido',
+                        breed: 'Siamês',
+                        colorSize: 'Médio, Olhos Azuis',
+                        datetime: '2026-03-07T10:00',
+                        location: 'Bairro Centro, Campinas',
+                        image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600',
+                        description: 'Encontrei este gatinho miando na porta de casa na chuva. Está abrigado e alimentado. Quem for o tutor entre em contato!',
+                        likes: ['u1'],
+                        createdAt: new Date(Date.now() - 86400000).toISOString()
+                    }
+                ];
+                localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(defaultPosts));
+            }
+
+            if (!localStorage.getItem(STORAGE_KEYS.COMMENTS)) {
+                const defaultComments = [
+                    { id: 'c1', postId: 'p1', userId: 'u2', userName: 'Carlos Lima', userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', text: 'Vou dar uma olhada aqui perto da praça central hoje à tarde!', createdAt: new Date().toISOString() }
+                ];
+                localStorage.setItem(STORAGE_KEYS.COMMENTS, JSON.stringify(defaultComments));
+            }
+
+            if (!localStorage.getItem(STORAGE_KEYS.MESSAGES)) {
+                const defaultMessages = [
+                    { id: 'm1', senderId: 'u2', recipientId: 'u1', text: 'Olá Ana, vi seu anúncio sobre o Thor. Acho que o vi perto da padaria!', createdAt: new Date(Date.now() - 3600000).toISOString() }
+                ];
+                localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(defaultMessages));
+            }
+        }
+
+        /* ================= STATE & APP CONTROLLER ================= */
+        const appState = {
+            currentView: 'feed',
+            activeChatPartnerId: null,
+            filterCategory: '',
+            filterStatus: '',
+            filterSearch: '',
+
+            navigate(view) {
+                // Restricted views check
+                const currentUser = getCurrentUser();
+                const isAdmin = localStorage.getItem(STORAGE_KEYS.ADMIN_LOGGED) === 'true';
+
+                if (view === 'my-alerts' && !currentUser) {
+                    showToast('Faça login para acessar seus alertas.', 'error');
+                    openAuthModal('login');
+                    return;
+                }
+                if (view === 'chat' && !currentUser) {
+                    showToast('Faça login para acessar o chat privado.', 'error');
+                    openAuthModal('login');
+                    return;
+                }
+                if (view === 'admin' && !isAdmin) {
+                    openAdminLoginModal();
+                    return;
+                }
+
+                this.currentView = view;
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`view-${view}`).classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Render specific view data
+                if (view === 'feed') renderFeed();
+                if (view === 'my-alerts') renderMyAlerts();
+                if (view === 'chat') renderChatConversations();
+                if (view === 'profile') renderProfileForm();
+                if (view === 'admin') renderAdminDashboard();
+                
+                updateNavigationUI();
+            },
+
+            filterPosts() {
+                this.filterSearch = document.getElementById('filter-search').value.toLowerCase();
+                this.filterCategory = document.getElementById('filter-category').value;
+                this.filterStatus = document.getElementById('filter-status').value;
+                renderFeed();
+            },
+
+            resetFilters() {
+                document.getElementById('filter-search').value = '';
+                document.getElementById('filter-category').value = '';
+                document.getElementById('filter-status').value = '';
+                this.filterSearch = '';
+                this.filterCategory = '';
+                this.filterStatus = '';
+                renderFeed();
+            }
+        };
+
+        function getCurrentUser() {
+            const raw = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        function updateNavigationUI() {
+            const user = getCurrentUser();
+            const isAdmin = localStorage.getItem(STORAGE_KEYS.ADMIN_LOGGED) === 'true';
+            const headerContainer = document.getElementById('auth-header-container');
+            const heroAuthActions = document.getElementById('hero-auth-actions');
+            const sidebarAuthBox = document.getElementById('sidebar-auth-box');
+
+            const navMyAlerts = document.getElementById('nav-my-alerts');
+            const navChat = document.getElementById('nav-chat');
+            const navAdmin = document.getElementById('nav-admin');
+
+            if (user) {
+                navMyAlerts.classList.remove('hidden');
+                navChat.classList.remove('hidden');
+                if(sidebarAuthBox) sidebarAuthBox.classList.add('hidden');
+                if(heroAuthActions) heroAuthActions.innerHTML = '';
+                updateUnreadMessagesBadge();
+            } else {
+                navMyAlerts.classList.add('hidden');
+                navChat.classList.add('hidden');
+                if(sidebarAuthBox) sidebarAuthBox.classList.remove('hidden');
+                if(heroAuthActions) {
+                    heroAuthActions.innerHTML = `
+                        <button onclick="openAuthModal('login')" class="bg-brand-700/80 hover:bg-brand-700 text-white font-semibold px-4 py-3 rounded-xl transition text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> Entrar
+                        </button>
+                    `;
+                }
+            }
+
+            if (isAdmin) {
+                navAdmin.classList.remove('hidden');
+            } else {
+                navAdmin.classList.add('hidden');
+            }
+
+            if (user) {
+                headerContainer.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <button onclick="appState.navigate('profile')" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition text-sm font-semibold">
+                            <img src="${user.avatar || 'https://placehold.co/100x100/e07a5f/fff?text=U'}" class="w-7 h-7 rounded-full object-cover">
+                            <span class="hidden sm:inline">${user.name.split(' ')[0]}</span>
+                        </button>
+                        <button onclick="handleLogout()" class="text-slate-400 hover:text-red-500 p-2 transition" title="Sair">
+                            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                headerContainer.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <button onclick="openAuthModal('login')" class="text-brand-600 hover:text-brand-700 font-bold text-sm px-3 py-2 border border-brand-200 rounded-xl hover:bg-brand-50 transition">Entrar</button>
+                        <button onclick="openAuthModal('register')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-sm transition">Cadastre-se</button>
+                    </div>
+                `;
+            }
+        }
+
+        /* ================= RENDER FEED ================= -->
+        function renderFeed() {
+            const container = document.getElementById('posts-feed-container');
+            const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            const currentUser = getCurrentUser();
+
+            // Update stats
+            document.getElementById('stat-total-pets').innerText = posts.length;
+            const reunitedCount = posts.filter(p => p.status === 'Encontrado / Reunido').length;
+            document.getElementById('stat-reunited').innerText = reunitedCount;
+
+            // Filter logic
+            const filtered = posts.filter(post => {
+                const matchSearch = !appState.filterSearch || 
+                    post.breed.toLowerCase().includes(appState.filterSearch) ||
+                    (post.petName && post.petName.toLowerCase().includes(appState.filterSearch)) ||
+                    post.location.toLowerCase().includes(appState.filterSearch) ||
+                    post.colorSize.toLowerCase().includes(appState.filterSearch);
+                
+                const matchCat = !appState.filterCategory || post.category === appState.filterCategory;
+                const matchStatus = !appState.filterStatus || post.status === appState.filterStatus;
+
+                return matchSearch && matchCat && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-12 rounded-2xl text-center space-y-3 border border-slate-200">
+                        <i class="fa-solid fa-paw text-4xl text-slate-300"></i>
+                        <h3 class="font-bold text-slate-700 text-lg">Nenhum pet encontrado</h3>
+                        <p class="text-sm text-slate-500">Tente ajustar seus filtros de busca ou publique um novo alerta.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(post => {
+                const isLiked = currentUser && post.likes && post.likes.includes(currentUser.id);
+                const comments = (JSON.parse(localStorage.getItem(STORAGE_KEYS.COMMENTS)) || []).filter(c => c.postId === post.id);
+                const badgeColor = post.status === 'Procurando' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300';
+
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden space-y-4">
+                        <!-- Post Header -->
+                        <div class="p-4 sm:p-5 pb-0 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <img src="${post.userAvatar || 'https://placehold.co/100'}" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">${post.userName}</h4>
+                                    <span class="text-xs text-slate-400 flex items-center gap-1">
+                                        <i class="fa-regular fa-clock"></i> ${new Date(post.createdAt).toLocaleDateString('pt-BR')} às ${new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold px-3 py-1 rounded-full border ${badgeColor}">
+                                    ${post.status}
+                                </span>
+                                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    ${post.category}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Pet Image -->
+                        <div class="relative bg-slate-100 aspect-video overflow-hidden">
+                            <img src="${post.image}" class="w-full h-full object-cover hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x400/e07a5f/fff?text=Pet'">
+                            <div class="absolute bottom-3 left-3 bg-slate-900/70 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-xl flex items-center gap-2">
+                                <i class="fa-solid fa-location-dot text-brand-500"></i> ${post.location}
+                            </div>
+                        </div>
+
+                        <!-- Pet Info Details -->
+                        <div class="px-5 space-y-2">
+                            <div class="flex flex-wrap justify-between items-center">
+                                <h3 class="text-lg font-bold text-slate-800">${post.petName ? post.petName : 'Pet sem nome'} <span class="text-sm font-normal text-slate-500">(${post.breed})</span></h3>
+                                <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">${post.colorSize}</span>
+                            </div>
+                            <p class="text-slate-600 text-sm leading-relaxed">${post.description}</p>
+                            <p class="text-xs text-slate-400">Ocorrência em: <span class="font-medium text-slate-600">${new Date(post.datetime).toLocaleString('pt-BR')}</span></p>
+                        </div>
+
+                        <!-- Action Bar (Like, Comment, Secure Chat) -->
+                        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+                            <div class="flex items-center gap-4">
+                                <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 text-sm font-semibold ${isLiked ? 'text-red-500' : 'text-slate-600 hover:text-red-500'} transition">
+                                    <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-lg"></i>
+                                    <span>${post.likes ? post.likes.length : 0}</span>
+                                </button>
+                                <button onclick="sharePost('${post.id}')" class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-brand-600 transition">
+                                    <i class="fa-solid fa-share-nodes"></i> Compartilhar
+                                </button>
+                            </div>
+                            <div>
+                                ${currentUser && currentUser.id === post.userId ? `
+                                    <span class="text-xs font-medium text-slate-400 italic">Sua publicação</span>
+                                ` : `
+                                    <button onclick="startSecureChat('${post.userId}', '${post.userName}')" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-xl shadow transition text-xs flex items-center gap-2">
+                                        <i class="fa-solid fa-comments"></i> Chat Seguro com Tutor
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="p-5 pt-3 space-y-3 bg-slate-50/50 border-t border-slate-100">
+                            <div class="space-y-2" id="comments-list-${post.id}">
+                                ${comments.map(c => `
+                                    <div class="flex items-start gap-2.5 text-sm bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                                        <img src="${c.userAvatar || 'https://placehold.co/100'}" class="w-7 h-7 rounded-full object-cover mt-0.5">
+                                        <div class="flex-grow">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-bold text-slate-800 text-xs">${c.userName}</span>
+                                                <span class="text-[10px] text-slate-400">${new Date(c.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                            </div>
+                                            <p class="text-slate-600 text-xs mt-0.5">${c.text}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <form onsubmit="handleCommentSubmit(event, '${post.id}')" class="flex gap-2 pt-1">
+                                <input type="text" id="comment-input-${post.id}" placeholder="Escreva uma dica ou palavra de apoio..." required class="flex-grow px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs">
+                                <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold transition">
+                                    Comentar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ================= SOCIAL INTERACTIONS ================= -->
+        function toggleLike(postId) {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                showToast('Faça login para curtir publicações.', 'error');
+                openAuthModal('login');
+                return;
+            }
+            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            posts = posts.map(p => {
+                if (p.id === postId) {
+                    p.likes = p.likes || [];
+                    const idx = p.likes.indexOf(currentUser.id);
+                    if (idx > -1) {
+                        p.likes.splice(idx, 1);
+                    } else {
+                        p.likes.push(currentUser.id);
+                    }
+                }
+                return p;
+            });
+            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+            renderFeed();
+        }
+
+        function handleCommentSubmit(event, postId) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                showToast('Faça login para comentar.', 'error');
+                openAuthModal('login');
+                return;
+            }
+
+            const inputEl = document.getElementById(`comment-input-${postId}`);
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            const comments = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMMENTS)) || [];
+            const newComment = {
+                id: 'c_' + Date.now(),
+                postId,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                userAvatar: currentUser.avatar,
+                text,
+                createdAt: new Date().toISOString()
+            };
+
+            comments.push(newComment);
+            localStorage.setItem(STORAGE_KEYS.COMMENTS, JSON.stringify(comments));
+            inputEl.value = '';
+            renderFeed();
+            showToast('Comentário publicado com sucesso!', 'success');
+        }
+
+        function sharePost(postId) {
+            const url = window.location.href.split('#')[0] + '#post-' + postId;
+            document.execCommand ? copyToClipboardFallback(url) : navigator.clipboard.writeText(url);
+            showToast('Link do alerta copiado para a área de transferência!', 'success');
+        }
+
+        function copyToClipboardFallback(text) {
+            const aux = document.createElement("input");
+            aux.setAttribute("value", text);
+            document.body.appendChild(aux);
+            aux.select();
+            document.execCommand("copy");
+            document.body.removeChild(aux);
+        }
+
+        /* ================= SECURE INTERNAL CHAT ================= -->
+        function startSecureChat(authorId, authorName) {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                showToast('Faça login para iniciar o chat.', 'error');
+                openAuthModal('login');
+                return;
+            }
+            if (currentUser.id === authorId) {
+                showToast('Esta é a sua própria publicação.', 'error');
+                return;
+            }
+
+            appState.activeChatPartnerId = authorId;
+            appState.navigate('chat');
+        }
+
+        function renderChatConversations() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+            const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || [];
+
+            // Find all unique partner IDs involved in messages with current user
+            const partnerIds = new Set();
+            messages.forEach(m => {
+                if (m.senderId === currentUser.id) partnerIds.add(m.recipientId);
+                if (m.recipientId === currentUser.id) partnerIds.add(m.senderId);
+            });
+
+            // Ensure active partner is in list
+            if (appState.activeChatPartnerId) partnerIds.add(appState.activeChatPartnerId);
+
+            const listContainer = document.getElementById('chat-conversations-list');
+            const partners = users.filter(u => u.id !== currentUser.id && partnerIds.has(u.id));
+
+            document.getElementById('chat-count-badge').innerText = partners.length;
+
+            if (partners.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-6 text-center text-slate-400 text-xs">
+                        Nenhuma conversa ativa. Clique em "Chat Seguro com Tutor" em qualquer publicação do Feed para iniciar.
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = partners.map(p => {
+                const isActive = appState.activeChatPartnerId === p.id;
+                return `
+                    <div onclick="selectChatPartner('${p.id}')" class="p-4 flex items-center gap-3 cursor-pointer transition ${isActive ? 'bg-brand-50 border-l-4 border-brand-500' : 'hover:bg-slate-100'}">
+                        <img src="${p.avatar || 'https://placehold.co/100'}" class="w-10 h-10 rounded-full object-cover">
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-slate-800 text-sm truncate">${p.name}</h4>
+                            <p class="text-xs text-slate-400 truncate">Região: ${p.region || 'Não informada'}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (appState.activeChatPartnerId) {
+                renderActiveChatBox();
+            }
+        }
+
+        function selectChatPartner(partnerId) {
+            appState.activeChatPartnerId = partnerId;
+            renderChatConversations();
+        }
+
+        function renderActiveChatBox() {
+            const currentUser = getCurrentUser();
+            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+            const partner = users.find(u => u.id === appState.activeChatPartnerId);
+            const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || [];
+
+            const chatArea = document.getElementById('chat-active-area');
+            if (!partner) return;
+
+            const conversationMsgs = messages.filter(m => 
+                (m.senderId === currentUser.id && m.recipientId === partner.id) ||
+                (m.senderId === partner.id && m.recipientId === currentUser.id)
+            ).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            chatArea.innerHTML = `
+                <!-- Partner Header -->
+                <div class="p-4 border-b border-slate-200 flex items-center gap-3 bg-slate-50">
+                    <img src="${partner.avatar || 'https://placehold.co/100'}" class="w-9 h-9 rounded-full object-cover">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">${partner.name}</h4>
+                        <span class="text-[10px] text-emerald-600 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-circle text-[8px]"></i> Chat Seguro e Privado (Sem exposição de telefone)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div id="chat-messages-scroll" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50/30">
+                    ${conversationMsgs.length === 0 ? `
+                        <div class="h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                            <i class="fa-solid fa-lock text-2xl mb-2 text-brand-400"></i>
+                            <p>Inicie a conversa sobre o resgate do pet com total segurança.</p>
+                        </div>
+                    ` : conversationMsgs.map(m => {
+                        const isMe = m.senderId === currentUser.id;
+                        return `
+                            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                                <div class="max-w-xs sm:max-w-md p-3 rounded-2xl text-sm ${isMe ? 'bg-brand-500 text-white rounded-br-2xs' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-2xs shadow-2xs'}">
+                                    <p>${m.text}</p>
+                                    <span class="block text-[10px] mt-1 text-right ${isMe ? 'text-white/80' : 'text-slate-400'}">${new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <!-- Message Input -->
+                <form onsubmit="handleSendMessage(event)" class="p-3 border-t border-slate-200 bg-white flex gap-2">
+                    <input type="text" id="chat-msg-input" placeholder="Digite sua mensagem de resgate..." required class="flex-grow px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar
+                    </button>
+                </form>
+            `;
+
+            // Scroll to bottom of chat
+            const scrollEl = document.getElementById('chat-messages-scroll');
+            scrollEl.scrollTop = scrollEl.scrollHeight;
+        }
+
+        function handleSendMessage(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            const inputEl = document.getElementById('chat-msg-input');
+            const text = inputEl.value.trim();
+            if (!text || !appState.activeChatPartnerId) return;
+
+            const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || [];
+            const newMsg = {
+                id: 'm_' + Date.now(),
+                senderId: currentUser.id,
+                recipientId: appState.activeChatPartnerId,
+                text,
+                createdAt: new Date().toISOString()
+            };
+
+            messages.push(newMsg);
+            localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+            inputEl.value = '';
+            renderActiveChatBox();
+            updateUnreadMessagesBadge();
+        }
+
+        function updateUnreadMessagesBadge() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+            const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || [];
+            const count = messages.filter(m => m.recipientId === currentUser.id).length;
+            const badge = document.getElementById('chat-badge');
+            if (count > 0) {
+                badge.innerText = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        /* ================= MY ALERTS MANAGEMENT ================= -->
+        function renderMyAlerts() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            const myPosts = posts.filter(p => p.userId === currentUser.id);
+            const container = document.getElementById('my-alerts-container');
+
+            if (myPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 bg-white p-12 rounded-2xl text-center space-y-3 border border-slate-200">
+                        <i class="fa-solid fa-bullhorn text-4xl text-slate-300"></i>
+                        <h3 class="font-bold text-slate-700 text-lg">Você ainda não publicou nenhum alerta</h3>
+                        <p class="text-sm text-slate-500">Publique avisos de pets perdidos ou achados para mobilizar a comunidade.</p>
+                        <button onclick="openPostModal()" class="mt-2 bg-brand-500 text-white px-4 py-2 rounded-xl text-xs font-semibold">Criar Primeiro Alerta</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = myPosts.map(post => {
+                const badgeColor = post.status === 'Procurando' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+                        <div class="p-4 flex gap-4">
+                            <img src="${post.image}" class="w-24 h-24 rounded-xl object-cover" onerror="this.src='https://placehold.co/200'">
+                            <div class="space-y-1 overflow-hidden flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${badgeColor}">${post.status}</span>
+                                    <span class="text-xs text-slate-400">${post.category}</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-base truncate">${post.petName || 'Sem nome'} (${post.breed})</h4>
+                                <p class="text-xs text-slate-500 truncate"><i class="fa-solid fa-location-dot"></i> ${post.location}</p>
+                                <p class="text-xs text-slate-600 line-clamp-2 mt-1">${post.description}</p>
+                            </div>
+                        </div>
+                        <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-[11px] text-slate-400">Publicado em ${new Date(post.createdAt).toLocaleDateString('pt-BR')}</span>
+                            <div class="flex gap-2">
+                                <button onclick="openPostModal('${post.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+                                    Editar
+                                </button>
+                                <button onclick="deletePost('${post.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deletePost(postId) {
+            if (!confirm('Deseja realmente excluir este alerta?')) return;
+            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            posts = posts.filter(p => p.id !== postId);
+            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+            renderMyAlerts();
+            showToast('Alerta excluído com sucesso.', 'success');
+        }
+
+        /* ================= PROFILE EDIT ================= -->
+        function renderProfileForm() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            document.getElementById('prof-name').value = user.name || '';
+            document.getElementById('prof-region').value = user.region || '';
+            document.getElementById('prof-avatar').value = user.avatar || '';
+            document.getElementById('prof-bio').value = user.bio || '';
+            document.getElementById('profile-display-name').innerText = user.name;
+            document.getElementById('profile-display-email').innerText = user.email;
+
+            const avatarPrev = document.getElementById('profile-avatar-preview');
+            if (user.avatar) {
+                avatarPrev.innerHTML = `<img src="${user.avatar}" class="w-full h-full object-cover">`;
+            } else {
+                avatarPrev.innerText = user.name.charAt(0).toUpperCase();
+            }
+        }
+
+        function handleProfileUpdate(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            currentUser.name = document.getElementById('prof-name').value;
+            currentUser.region = document.getElementById('prof-region').value;
+            currentUser.avatar = document.getElementById('prof-avatar').value;
+            currentUser.bio = document.getElementById('prof-bio').value;
+
+            localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(currentUser));
+
+            // Also update in users list
+            let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+            users = users.map(u => u.id === currentUser.id ? currentUser : u);
+            localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+            renderProfileForm();
+            updateNavigationUI();
+            showToast('Perfil atualizado com sucesso!', 'success');
+        }
+
+        /* ================= ADMIN DASHBOARD ================= -->
+        function renderAdminDashboard() {
+            const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+            const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || [];
+
+            document.getElementById('adm-stat-posts').innerText = posts.length;
+            document.getElementById('adm-stat-active').innerText = posts.filter(p => p.status === 'Procurando').length;
+            document.getElementById('adm-stat-reunited').innerText = posts.filter(p => p.status === 'Encontrado / Reunido').length;
+            document.getElementById('adm-stat-users').innerText = users.length;
+            document.getElementById('adm-stat-messages').innerText = messages.length;
+
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            const search = (document.getElementById('admin-search').value || '').toLowerCase();
+            const tbody = document.getElementById('admin-posts-tbody');
+
+            const filtered = posts.filter(p => 
+                p.breed.toLowerCase().includes(search) || 
+                p.userName.toLowerCase().includes(search) || 
+                p.location.toLowerCase().includes(search) ||
+                p.category.toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${p.image}" class="w-10 h-10 rounded-lg object-cover" onerror="this.src='https://placehold.co/100'">
+                        <div>
+                            <span class="font-bold text-slate-800 block">${p.petName || 'Sem nome'} (${p.breed})</span>
+                            <span class="text-xs text-slate-500">${p.category}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-slate-700 font-medium">${p.userName}</td>
+                    <td class="p-4 text-slate-500 text-xs">${p.location}</td>
+                    <td class="p-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${p.status === 'Procurando' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                            ${p.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="adminDeletePost('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-xl text-xs font-semibold transition" title="Remover postagem imprópria">
+                            <i class="fa-solid fa-trash"></i> Remover
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function adminDeletePost(postId) {
+            if (!confirm('[MODERAÇÃO] Deseja remover esta postagem por violação das diretrizes?')) return;
+            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            posts = posts.filter(p => p.id !== postId);
+            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+            renderAdminDashboard();
+            showToast('Postagem removida pelo Administrador.', 'success');
+        }
+
+        function adminLogout() {
+            localStorage.removeItem(STORAGE_KEYS.ADMIN_LOGGED);
+            updateNavigationUI();
+            appState.navigate('feed');
+            showToast('Sessão administrativa encerrada.', 'success');
+        }
+
+        /* ================= AUTH MODAL & VALIDATION ================= -->
+        let isRegisterMode = false;
+
+        function openAuthModal(mode = 'login') {
+            isRegisterMode = (mode === 'register');
+            const titleEl = document.getElementById('auth-modal-title');
+            const nameGroup = document.getElementById('auth-name-group');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (isRegisterMode) {
+                titleEl.innerText = 'Criar Conta no AuChou';
+                nameGroup.classList.remove('hidden');
+                document.getElementById('auth-name').setAttribute('required', 'true');
+                toggleBtn.innerText = 'Já tem uma conta? Faça login';
+                submitBtn.innerText = 'Cadastrar';
+            } else {
+                titleEl.innerText = 'Entrar no AuChou';
+                nameGroup.classList.add('hidden');
+                document.getElementById('auth-name').removeAttribute('required');
+                toggleBtn.innerText = 'Não tem uma conta? Cadastre-se agora';
+                submitBtn.innerText = 'Entrar';
+            }
+
+            document.getElementById('auth-error-msg').classList.add('hidden');
+            document.getElementById('auth-form').reset();
+            document.getElementById('modal-auth').classList.remove('hidden');
+        }
+
+        function toggleAuthMode() {
+            openAuthModal(isRegisterMode ? 'login' : 'register');
+        }
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const errorEl = document.getElementById('auth-error-msg');
+            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS)) || [];
+
+            if (isRegisterMode) {
+                const name = document.getElementById('auth-name').value.trim();
+                if (!name || !email || !password) {
+                    errorEl.innerText = 'Preencha todos os campos obrigatórios.';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+                const existing = users.find(u => u.email === email);
+                if (existing) {
+                    errorEl.innerText = 'Este e-mail já está cadastrado.';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                const newUser = {
+                    id: 'u_' + Date.now(),
+                    name,
+                    email,
+                    password,
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                    bio: 'Novo tutor na comunidade AuChou.',
+                    region: 'São Paulo'
+                };
+                users.push(newUser);
+                localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+                localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(newUser));
+
+                closeModal('modal-auth');
+                updateNavigationUI();
+                renderFeed();
+                showToast(`Bem-vindo(a) ao AuChou, ${name}!`, 'success');
+            } else {
+                const user = users.find(u => u.email === email && u.password === password);
+                if (!user) {
+                    errorEl.innerText = 'E-mail ou senha incorretos. (Dica: ana@email.com ou carlos@email.com com senha 123)';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+                closeModal('modal-auth');
+                updateNavigationUI();
+                renderFeed();
+                showToast(`Login realizado com sucesso!`, 'success');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+            updateNavigationUI();
+            appState.navigate('feed');
+            showToast('Sessão encerrada com segurança.', 'success');
+        }
+
+        function openAdminLoginModal() {
+            document.getElementById('adm-login-error').classList.add('hidden');
+            document.getElementById('modal-admin-login').classList.remove('hidden');
+        }
+
+        function handleAdminLoginSubmit(event) {
+            event.preventDefault();
+            const user = document.getElementById('adm-login-user').value;
+            const pass = document.getElementById('adm-login-pass').value;
+
+            if (user === 'admin' && pass === '123456') {
+                localStorage.setItem(STORAGE_KEYS.ADMIN_LOGGED, 'true');
+                closeModal('modal-admin-login');
+                updateNavigationUI();
+                appState.navigate('admin');
+                showToast('Painel administrativo acessado com sucesso.', 'success');
+            } else {
+                document.getElementById('adm-login-error').classList.remove('hidden');
+            }
+        }
+
+        /* ================= CREATE / EDIT POST MODAL ================= -->
+        function checkAuthAndOpenCreatePost() {
+            const user = getCurrentUser();
+            if (!user) {
+                showToast('Faça login para publicar um alerta de pet.', 'error');
+                openAuthModal('login');
+                return;
+            }
+            openPostModal();
+        }
+
+        function openPostModal(postId = null) {
+            const form = document.getElementById('post-form');
+            form.reset();
+            document.getElementById('post-error-msg').classList.add('hidden');
+
+            if (postId) {
+                document.getElementById('post-modal-title').innerText = 'Editar Alerta de Pet';
+                const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+                const post = posts.find(p => p.id === postId);
+                if (post) {
+                    document.getElementById('edit-post-id').value = post.id;
+                    document.getElementById('post-category').value = post.category;
+                    document.getElementById('post-status').value = post.status;
+                    document.getElementById('post-pet-name').value = post.petName || '';
+                    document.getElementById('post-breed').value = post.breed;
+                    document.getElementById('post-color-size').value = post.colorSize;
+                    document.getElementById('post-datetime').value = post.datetime;
+                    document.getElementById('post-location').value = post.location;
+                    document.getElementById('post-image').value = post.image;
+                    document.getElementById('post-description').value = post.description;
+                }
+            } else {
+                document.getElementById('post-modal-title').innerText = 'Publicar Alerta de Pet';
+                document.getElementById('edit-post-id').value = '';
+                // Default current datetime
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('post-datetime').value = now.toISOString().slice(0,16);
+            }
+
+            document.getElementById('modal-post').classList.remove('hidden');
+        }
+
+        function handlePostSubmit(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            const postId = document.getElementById('edit-post-id').value;
+            const category = document.getElementById('post-category').value;
+            const status = document.getElementById('post-status').value;
+            const petName = document.getElementById('post-pet-name').value.trim();
+            const breed = document.getElementById('post-breed').value.trim();
+            const colorSize = document.getElementById('post-color-size').value.trim();
+            const datetime = document.getElementById('post-datetime').value;
+            const location = document.getElementById('post-location').value.trim();
+            const image = document.getElementById('post-image').value.trim();
+            const description = document.getElementById('post-description').value.trim();
+
+            // JS Validation
+            if (!category || !status || !breed || !colorSize || !datetime || !location || !image || !description) {
+                const err = document.getElementById('post-error-msg');
+                err.innerText = 'Por favor, preencha todos os campos obrigatórios (*).';
+                err.classList.remove('hidden');
+                return;
+            }
+
+            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+
+            if (postId) {
+                // Edit existing
+                posts = posts.map(p => {
+                    if (p.id === postId) {
+                        return { ...p, category, status, petName, breed, colorSize, datetime, location, image, description };
+                    }
+                    return p;
+                });
+                showToast('Alerta atualizado com sucesso!', 'success');
+            } else {
+                // Create new
+                const newPost = {
+                    id: 'p_' + Date.now(),
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    userAvatar: currentUser.avatar,
+                    category,
+                    status,
+                    petName,
+                    breed,
+                    colorSize,
+                    datetime,
+                    location,
+                    image,
+                    description,
+                    likes: [],
+                    createdAt: new Date().toISOString()
+                };
+                posts.unshift(newPost);
+                showToast('Alerta publicado com sucesso na rede social!', 'success');
+            }
+
+            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+            closeModal('modal-post');
+            renderFeed();
+            if (appState.currentView === 'my-alerts') renderMyAlerts();
+        }
+
+        /* ================= UTILS & HELPERS ================= -->
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-600 text-white';
+            const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-exclamation text-white';
+
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium transition duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Initialization on window load
+        window.onload = function() {
+            initializeStorage();
+            updateNavigationUI();
+            renderFeed();
+        };
+    </script>
+</body>
+</html>
