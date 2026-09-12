@@ -164,7 +164,6 @@
                 <p id="forgot-subtitle" class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado para receber o link de redefinição</p>
             </div>
 
-            <!-- Supabase Password Reset Form -->
             <form id="forgot-step1-form" onsubmit="handleSupabasePasswordReset(event)">
                 <div class="mb-4">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">E-mail Cadastrado</label>
@@ -180,6 +179,7 @@
         </div>
     </div>
 
+    <!-- Modal de Publicação de Alertas -->
     <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8">
             <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -280,6 +280,7 @@
 
     <script>
         const STORAGE_KEYS = {
+            USERS: 'auchou_users',
             POSTS: 'auchou_posts',
             COMMENTS: 'auchou_comments',
             CHATS: 'auchou_chats',
@@ -321,11 +322,10 @@
             }
         }
 
-        // Verifica o estado da sessão do Supabase ao carregar a página
+        // Sincroniza a sessão do Supabase ao carregar a página
         document.addEventListener('DOMContentLoaded', async () => {
             initializeSeedData();
             
-            // Aguarda o Supabase carregar
             setTimeout(async () => {
                 if (window.supabase) {
                     const { data: { session } } = await window.supabase.auth.getSession();
@@ -429,11 +429,10 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        // Integração real de Recuperação de Senha com Supabase
         async function handleSupabasePasswordReset(event) {
             event.preventDefault();
             const email = document.getElementById('forgot-email').value.trim();
-            const errorEl = id('forgot-error-msg-1') || document.getElementById('forgot-error-msg-1');
+            const errorEl = document.getElementById('forgot-error-msg-1');
 
             const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.href.split('#')[0]
@@ -448,7 +447,6 @@
             }
         }
 
-        // Integração real de Cadastro e Login com Supabase Auth
         async function handleAuthSubmit(event) {
             event.preventDefault();
             const email = document.getElementById('auth-email').value.trim();
@@ -477,7 +475,7 @@
                     errorEl.innerText = error.message;
                     errorEl.classList.remove('hidden');
                 } else {
-                    showToast('Cadastro realizado! Verifique sua caixa de entrada.', 'success');
+                    showToast('Cadastro realizado com sucesso!', 'success');
                     closeModal('modal-auth');
                 }
             } else {
@@ -596,11 +594,6 @@
         }
 
         function renderPostCard(post) {
-            const isLiked = currentUser && post.likes && post.likes.includes(currentUser.id);
-            const comments = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMMENTS)) || {};
-            const postComments = comments[post.id] || [];
-            const isResolved = post.status === 'Reunido';
-
             return `
                 <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden text-xs">
                     <div class="p-3 flex items-center justify-between border-b border-gray-100 bg-gray-50">
@@ -611,11 +604,11 @@
                                 <p class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</p>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${isResolved ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-100 text-brand-700'}">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-100 text-brand-700">
                             ${post.category}
                         </span>
                     </div>
-                    <div class="relative bg-gray-100 max-h-80 overflow-hidden cursor-pointer" onclick="openPostDetails('${post.id}')">
+                    <div class="relative bg-gray-100 max-h-80 overflow-hidden cursor-pointer">
                         <img src="${post.photo}" alt="${post.breed}" class="w-full h-full object-cover max-h-80">
                     </div>
                     <div class="p-3">
@@ -625,23 +618,97 @@
             `;
         }
 
-        function openPostModal() {
+        function openPostModal(postIdToEdit = null) {
             if (!currentUser) { openAuthModal('login'); return; }
-            document.getElementById('modal-post').classList.remove('hidden');
+            const modal = document.getElementById('modal-post');
+            const fileInput = document.getElementById('post-photo-file');
+            
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(uploadEvent) {
+                        document.getElementById('post-photo-url').value = uploadEvent.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            modal.classList.remove('hidden');
         }
 
         function handlePostSubmit(event) {
             event.preventDefault();
-            // Mantém a lógica de postagem local existente
+            const category = document.getElementById('post-category').value;
+            const breed = document.getElementById('post-breed').value.trim();
+            const size = document.getElementById('post-size').value;
+            const color = document.getElementById('post-color').value.trim();
+            const location = document.getElementById('post-location').value.trim();
+            const datetime = document.getElementById('post-datetime').value;
+            const status = document.getElementById('post-status').value;
+            let photo = document.getElementById('post-photo-url').value.trim();
+            const description = document.getElementById('post-desc').value.trim();
+
+            if (!photo) {
+                photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600';
+            }
+
+            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            const newPost = {
+                id: 'p_' + Date.now(),
+                userId: currentUser.id,
+                userName: currentUser.name,
+                userAvatar: currentUser.avatar,
+                category,
+                species: document.getElementById('post-species').value,
+                breed,
+                size,
+                color,
+                location,
+                datetime,
+                status,
+                photo,
+                description,
+                likes: [],
+                createdAt: Date.now()
+            };
+
+            posts.unshift(newPost);
+            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
             closeModal('modal-post');
             renderFeed();
             showToast('Alerta publicado com sucesso!', 'success');
         }
 
         function switchTab(tab) {
+            currentActiveTab = tab;
             if (tab === 'feed') renderFeed();
-            else if (tab === 'profile') renderFeed();
-            else if (tab === 'chats') renderFeed();
+            else if (tab === 'profile' || tab === 'my-posts') renderProfileView();
+            else if (tab === 'chats') renderChatView();
+        }
+
+        function renderProfileView() {
+            if (!currentUser) { openAuthModal('login'); return; }
+            const appView = document.getElementById('app-view');
+            appView.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-4 text-xs">
+                    <div class="bg-white rounded p-4 shadow-sm border border-gray-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="${currentUser.avatar}" class="w-16 h-16 rounded object-cover border-2 border-brand-500">
+                            <div>
+                                <h2 class="font-bold text-sm text-gray-900">${currentUser.name}</h2>
+                                <p class="text-gray-500">${currentUser.email}</p>
+                                <p class="text-gray-600 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChatView() {
+            const appView = document.getElementById('app-view');
+            appView.innerHTML = `<div class="bg-white p-6 rounded text-center text-xs">Painel de mensagens e chat ativo.</div>`;
         }
     </script>
 </body>
