@@ -107,6 +107,7 @@
         </div>
     </footer>
 
+    <!-- Modais de Autenticação -->
     <div id="modal-auth" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative transform transition-all">
             <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -151,6 +152,7 @@
         </div>
     </div>
 
+    <!-- Modal Esqueceu a Senha -->
     <div id="modal-forgot" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeModal('modal-forgot')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -279,14 +281,6 @@
     </div>
 
     <script>
-        const STORAGE_KEYS = {
-            USERS: 'auchou_users',
-            POSTS: 'auchou_posts',
-            COMMENTS: 'auchou_comments',
-            CHATS: 'auchou_chats',
-            ADMIN_LOGGED: 'auchou_admin_logged'
-        };
-
         const ADMIN_EMAIL = 'bruninho0861@gmail.com';
 
         let currentUser = null;
@@ -295,37 +289,8 @@
         let activeChatRecipient = null;
         let isRegisterMode = false;
 
-        function initializeSeedData() {
-            if (!localStorage.getItem(STORAGE_KEYS.POSTS)) {
-                const initialPosts = [
-                    {
-                        id: 'p_1',
-                        userId: 'u_1',
-                        userName: 'Mariana Silva',
-                        userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-                        category: 'Cão Perdido',
-                        petName: 'Bob',
-                        species: 'Cão',
-                        breed: 'Golden Retriever',
-                        size: 'Grande',
-                        color: 'Dourado',
-                        location: 'Vila Progresso, Itapetininga - SP',
-                        datetime: '2026-03-10T14:30',
-                        status: 'Procurando',
-                        photo: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=600',
-                        description: 'Usa coleira azul escuro. É muito amigável, responde pelo nome de Bob. Se viu por favor entre em contato!',
-                        likes: ['u_admin'],
-                        createdAt: Date.now() - 3600000 * 5
-                    }
-                ];
-                localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(initialPosts));
-            }
-        }
-
         // Sincroniza a sessão do Supabase ao carregar a página
         document.addEventListener('DOMContentLoaded', async () => {
-            initializeSeedData();
-            
             setTimeout(async () => {
                 if (window.supabase) {
                     const { data: { session } } = await window.supabase.auth.getSession();
@@ -342,7 +307,7 @@
                     }
                 }
                 updateNavigationUI();
-                renderFeed();
+                renderFeed(); // Inicia a busca no banco de dados aqui
             }, 500);
         });
 
@@ -532,20 +497,64 @@
             }, 3500);
         }
 
-        function renderFeed(filter = {}) {
+        // Função transformada em Async para buscar no Supabase
+        async function renderFeed(filter = {}) {
             currentActiveTab = 'feed';
             const appView = document.getElementById('app-view');
-            const posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            
+            // Exibir estado de carregamento enquanto busca do banco
+            appView.innerHTML = `
+                <div class="flex flex-col justify-center items-center py-20">
+                    <i class="fa-solid fa-spinner fa-spin text-brand-500 text-4xl mb-3"></i>
+                    <span class="text-gray-500 font-medium">Buscando alertas na comunidade...</span>
+                </div>
+            `;
+
+            let posts = [];
+            try {
+                // Buscando a tabela 'posts' no Supabase
+                const { data, error } = await window.supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                posts = data || [];
+            } catch (err) {
+                console.error("Erro ao carregar os posts:", err);
+                showToast("Falha na conexão com o banco de dados.", "error");
+            }
+
+            // Normalizando os dados (suporta snake_case e camelCase)
+            const normalizedPosts = posts.map(p => ({
+                id: p.id,
+                userId: p.user_id || p.userId,
+                userName: p.user_name || p.userName,
+                userAvatar: p.user_avatar || p.userAvatar,
+                category: p.category,
+                species: p.species,
+                breed: p.breed,
+                size: p.size,
+                color: p.color,
+                location: p.location,
+                datetime: p.datetime,
+                status: p.status,
+                photo: p.photo,
+                description: p.description,
+                likes: p.likes || [],
+                createdAt: p.created_at || p.createdAt,
+                petName: p.pet_name || p.petName
+            }));
 
             const speciesFilter = filter.species || document.getElementById('filter-species')?.value || '';
             const statusFilter = filter.status || document.getElementById('filter-status')?.value || '';
             const searchKeyword = filter.search || document.getElementById('global-search-input')?.value?.toLowerCase() || '';
 
-            const filteredPosts = posts.filter(post => {
+            const filteredPosts = normalizedPosts.filter(post => {
                 if (speciesFilter && post.species !== speciesFilter) return false;
                 if (statusFilter && post.status !== statusFilter) return false;
                 if (searchKeyword) {
-                    const matchText = `${post.breed} ${post.petName} ${post.location} ${post.description} ${post.category}`.toLowerCase();
+                    const matchText = `${post.breed} ${post.petName || ''} ${post.location} ${post.description} ${post.category}`.toLowerCase();
                     if (!matchText.includes(searchKeyword)) return false;
                 }
                 return true;
@@ -562,7 +571,6 @@
                                 <div class="text-left text-xs space-y-1.5 border-t border-gray-100 pt-2 text-gray-700">
                                     <p><a href="#" onclick="switchTab('profile'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-user mr-1.5 w-4"></i> meu perfil</a></p>
                                     <p><a href="#" onclick="switchTab('chats'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-comments mr-1.5 w-4"></i> recados / chat</a></p>
-                                    <p><a href="#" onclick="switchTab('my-posts'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-paw mr-1.5 w-4"></i> meus alertas</a></p>
                                 </div>
                             </div>
                         </div>
@@ -612,6 +620,7 @@
                         <img src="${post.photo}" alt="${post.breed}" class="w-full h-full object-cover max-h-80">
                     </div>
                     <div class="p-3">
+                        ${post.petName ? `<p class="font-bold text-gray-800 mb-1">Nome do Pet: ${post.petName}</p>` : ''}
                         <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
                     </div>
                 </div>
@@ -637,9 +646,18 @@
             modal.classList.remove('hidden');
         }
 
-        function handlePostSubmit(event) {
+        // Função transformada em Async para salvar no Supabase
+        async function handlePostSubmit(event) {
             event.preventDefault();
+            
+            // Alterar o botão para estado de "salvando" para evitar duplo clique
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Publicando...';
+            submitBtn.disabled = true;
+
             const category = document.getElementById('post-category').value;
+            const pet_name = document.getElementById('post-pet-name').value.trim();
             const breed = document.getElementById('post-breed').value.trim();
             const size = document.getElementById('post-size').value;
             const color = document.getElementById('post-color').value.trim();
@@ -653,31 +671,51 @@
                 photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600';
             }
 
-            let posts = JSON.parse(localStorage.getItem(STORAGE_KEYS.POSTS)) || [];
+            // Objeto a ser enviado para a tabela 'posts' no Supabase
             const newPost = {
-                id: 'p_' + Date.now(),
-                userId: currentUser.id,
-                userName: currentUser.name,
-                userAvatar: currentUser.avatar,
-                category,
+                user_id: currentUser.id,
+                user_name: currentUser.name,
+                user_avatar: currentUser.avatar,
+                pet_name: pet_name,
+                category: category,
                 species: document.getElementById('post-species').value,
-                breed,
-                size,
-                color,
-                location,
-                datetime,
-                status,
-                photo,
-                description,
-                likes: [],
-                createdAt: Date.now()
+                breed: breed,
+                size: size,
+                color: color,
+                location: location,
+                datetime: datetime,
+                status: status,
+                photo: photo,
+                description: description,
+                likes: []
             };
 
-            posts.unshift(newPost);
-            localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
-            closeModal('modal-post');
-            renderFeed();
-            showToast('Alerta publicado com sucesso!', 'success');
+            try {
+                // Inserir os dados na tabela do banco
+                const { error } = await window.supabase
+                    .from('posts')
+                    .insert([newPost]);
+                
+                if (error) throw error;
+                
+                // Limpar campos e fechar o modal
+                closeModal('modal-post');
+                document.getElementById('post-form').reset();
+                document.getElementById('post-photo-url').value = '';
+                
+                // Recarregar os dados renderizando o feed do banco
+                renderFeed();
+                showToast('Alerta publicado com sucesso!', 'success');
+            } catch (err) {
+                console.error("Erro ao salvar alerta no Supabase:", err);
+                const errorMsg = document.getElementById('post-error-msg');
+                errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                // Restaurar botão
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+            }
         }
 
         function switchTab(tab) {
