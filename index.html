@@ -296,21 +296,25 @@
                     
                     const { data: { session } } = await window.supabase.auth.getSession();
                     if (session) {
-                        currentUser = {
-                            id: session.user.id,
-                            name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
-                            email: session.user.email,
-                            avatar: session.user.user_metadata?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-                            bio: 'Membro da comunidade AuChou.',
-                            region: 'Itapetininga - SP'
-                        };
-                        if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
+                        await fetchUserProfile(session.user);
                     }
                     updateNavigationUI();
                     renderFeed();
                 }
             }, 100);
         });
+
+        async function fetchUserProfile(authUser) {
+            currentUser = {
+                id: authUser.id,
+                name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
+                email: authUser.email,
+                avatar: authUser.user_metadata?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+                bio: authUser.user_metadata?.bio || 'Membro da comunidade AuChou.',
+                region: authUser.user_metadata?.region || 'Itapetininga - SP'
+            };
+            if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
+        }
 
         function updateNavigationUI() {
             const navActions = document.getElementById('nav-actions');
@@ -328,7 +332,7 @@
                     ${adminLink}
                     <button onclick="switchTab('feed')" class="hover:underline">Home</button>
                     <button onclick="switchTab('profile')" class="hover:underline">Profile</button>
-                    <button onclick="switchTab('chats')" class="hover:underline">Scraps / Chat</button>
+                    <button onclick="switchTab('chats')" class="hover:underline">Mensagens / Chat</button>
                     <button onclick="openPostModal()" class="bg-white text-brand-700 px-3 py-1 rounded font-bold shadow hover:bg-brand-50 transition">Novo Alerta</button>
                     <button onclick="handleLogout()" class="text-brand-100 hover:text-white" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
                 `;
@@ -433,7 +437,7 @@
                     email: email,
                     password: password,
                     options: {
-                        data: { full_name: name }
+                        data: { full_name: name, avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' }
                     }
                 });
 
@@ -454,16 +458,7 @@
                     errorEl.innerText = 'E-mail ou senha incorretos.';
                     errorEl.classList.remove('hidden');
                 } else {
-                    currentUser = {
-                        id: data.user.id,
-                        name: data.user.user_metadata?.full_name || data.user.email.split('@')[0],
-                        email: data.user.email,
-                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-                        bio: 'Membro da comunidade AuChou.',
-                        region: 'Itapetininga - SP'
-                    };
-                    if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
-
+                    await fetchUserProfile(data.user);
                     closeModal('modal-auth');
                     updateNavigationUI();
                     renderFeed();
@@ -567,7 +562,7 @@
                                 <p class="text-[11px] text-gray-500 mb-3"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
                                 <div class="text-left text-xs space-y-1.5 border-t border-gray-100 pt-2 text-gray-700">
                                     <p><a href="#" onclick="switchTab('profile'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-user mr-1.5 w-4"></i> meu perfil</a></p>
-                                    <p><a href="#" onclick="switchTab('chats'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-comments mr-1.5 w-4"></i> recados / chat</a></p>
+                                    <p><a href="#" onclick="switchTab('chats'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-comments mr-1.5 w-4"></i> mensagens / chat</a></p>
                                 </div>
                             </div>
                         </div>
@@ -647,7 +642,7 @@
             switchTab('chats');
         }
 
-        function openPostModal(postIdToEdit = null) {
+        function openPostModal() {
             if (!currentUser) { openAuthModal('login'); return; }
             const modal = document.getElementById('modal-post');
             const fileInput = document.getElementById('post-photo-file');
@@ -724,7 +719,7 @@
                 console.error("Erro ao salvar alerta no Supabase:", err);
                 const errorMsg = document.getElementById('post-error-msg');
                 errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
-                errorMsg.classList.add('hidden');
+                errorMsg.classList.remove('hidden');
             } finally {
                 submitBtn.innerText = originalBtnText;
                 submitBtn.disabled = false;
@@ -734,7 +729,7 @@
         function switchTab(tab) {
             currentActiveTab = tab;
             if (tab === 'feed') renderFeed();
-            else if (tab === 'profile' || tab === 'my-posts') renderProfileView();
+            else if (tab === 'profile') renderProfileView();
             else if (tab === 'chats') renderChatView();
         }
 
@@ -742,19 +737,76 @@
             if (!currentUser) { openAuthModal('login'); return; }
             const appView = document.getElementById('app-view');
             appView.innerHTML = `
-                <div class="max-w-4xl mx-auto space-y-4 text-xs">
-                    <div class="bg-white rounded p-4 shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <img src="${currentUser.avatar}" class="w-16 h-16 rounded object-cover border-2 border-brand-500">
-                            <div>
-                                <h2 class="font-bold text-sm text-gray-900">${currentUser.name}</h2>
+                <div class="max-w-xl mx-auto space-y-4 text-xs">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
+                            <div class="relative group">
+                                <img id="profile-avatar-preview" src="${currentUser.avatar}" class="w-24 h-24 rounded-full object-cover border-4 border-brand-500 shadow-md">
+                                <label for="profile-photo-input" class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                                    <i class="fa-solid fa-camera text-lg"></i>
+                                </label>
+                                <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleProfilePhotoChange(event)">
+                            </div>
+                            <div class="text-center sm:text-left">
+                                <h2 class="font-bold text-base text-gray-900">${currentUser.name}</h2>
                                 <p class="text-gray-500">${currentUser.email}</p>
-                                <p class="text-gray-600 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
+                                <p class="text-gray-600 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
+                                <p class="text-[11px] text-brand-600 mt-2 font-medium"><i class="fa-solid fa-circle-info mr-1"></i>Clique na sua foto para alterá-la instantaneamente</p>
                             </div>
                         </div>
+
+                        <form onsubmit="handleProfileUpdate(event)" class="space-y-4 border-t pt-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome Completo</label>
+                                <input type="text" id="profile-edit-name" value="${currentUser.name}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Região / Cidade</label>
+                                <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                            </div>
+                            <input type="hidden" id="profile-edit-avatar" value="${currentUser.avatar}">
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-brand-500 text-white px-5 py-2 rounded text-xs font-medium hover:bg-brand-600 transition shadow">Salvar Alterações</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             `;
+        }
+
+        function handleProfilePhotoChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    document.getElementById('profile-avatar-preview').src = base64Image;
+                    document.getElementById('profile-edit-avatar').value = base64Image;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+            const newName = document.getElementById('profile-edit-name').value.trim();
+            const newRegion = document.getElementById('profile-edit-region').value.trim();
+            const newAvatar = document.getElementById('profile-edit-avatar').value.trim();
+
+            currentUser.name = newName;
+            currentUser.region = newRegion;
+            currentUser.avatar = newAvatar;
+
+            const { error } = await window.supabase.auth.updateUser({
+                data: { full_name: newName, avatar: newAvatar, region: newRegion }
+            });
+
+            if (error) {
+                showToast("Erro ao atualizar perfil: " + error.message, "error");
+            } else {
+                showToast("Perfil atualizado com sucesso!", "success");
+                updateNavigationUI();
+            }
         }
 
         async function renderChatView() {
@@ -762,11 +814,10 @@
             const appView = document.getElementById('app-view');
             
             if (!activeChatRecipient) {
-                // Tela de Caixa de Entrada / Lista de Conversas
                 appView.innerHTML = `
                     <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
                         <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
-                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-brand-500"></i>Minhas Conversas (Caixa de Entrada)</h3>
+                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-brand-500"></i>Minhas Mensagens (Caixa de Entrada)</h3>
                             <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
                         </div>
                         <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-gray-50 text-xs">
@@ -778,7 +829,6 @@
                 return;
             }
 
-            // Tela da Conversa Ativa
             appView.innerHTML = `
                 <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
                     <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
@@ -808,7 +858,6 @@
 
             loadMessages();
 
-            // Configura canal Realtime
             if (window.chatSubscription) {
                 window.supabase.removeChannel(window.chatSubscription);
             }
@@ -848,12 +897,10 @@
                     return;
                 }
 
-                // Agrupa conversas por contato único analisando quem mandou e quem recebeu
                 const contactsMap = new Map();
                 data.forEach(msg => {
                     const isMe = msg.sender_id === currentUser.id;
                     const contactId = isMe ? msg.recipient_id : msg.sender_id;
-                    // Define o nome amigável do contato
                     const contactName = isMe 
                         ? (msg.recipient_name || 'Usuário') 
                         : (msg.sender_name || 'Usuário');
