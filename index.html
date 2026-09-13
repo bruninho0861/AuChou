@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuChou — Rede Social de Pets Perdidos e Achados</title>
+    <!-- Configuração do PWA (Aplicativo) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#365314">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for icons -->
@@ -412,7 +416,6 @@
                     showToast("💬 Você recebeu uma nova mensagem!", "success");
                     lastKnownMessageCount = totalMessages;
                     
-                    // Se estiver com o chat aberto na tela de conversas ou na conversa ativa, atualiza em tempo real
                     if (currentActiveTab === 'chats') {
                         if (activeChatRecipient) {
                             loadMessages();
