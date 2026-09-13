@@ -762,21 +762,28 @@
             const appView = document.getElementById('app-view');
             
             if (!activeChatRecipient) {
+                // Tela de Caixa de Entrada / Lista de Conversas
                 appView.innerHTML = `
-                    <div class="bg-white p-8 rounded shadow-sm border border-gray-200 max-w-md mx-auto text-center text-xs space-y-3">
-                        <i class="fa-solid fa-comments text-4xl text-brand-500"></i>
-                        <h3 class="font-bold text-gray-900 text-sm">Nenhuma conversa selecionada</h3>
-                        <p class="text-gray-500">Vá até o feed e clique em <strong>"Falar com o Tutor"</strong> em algum alerta para iniciar um chat sobre o pet.</p>
-                        <button onclick="switchTab('feed')" class="bg-brand-500 text-white px-4 py-2 rounded font-medium hover:bg-brand-600 transition shadow">Ir para o Feed</button>
+                    <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                        <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
+                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-brand-500"></i>Minhas Conversas (Caixa de Entrada)</h3>
+                            <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
+                        </div>
+                        <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-gray-50 text-xs">
+                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><p>Carregando conversas...</p></div>
+                        </div>
                     </div>
                 `;
+                loadInboxConversations();
                 return;
             }
 
+            // Tela da Conversa Ativa
             appView.innerHTML = `
-                <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[500px]">
+                <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
                     <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
                         <div class="flex items-center space-x-2">
+                            <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
                             <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">
                                 ${activeChatRecipient.name.charAt(0).toUpperCase()}
                             </div>
@@ -793,7 +800,7 @@
                     </div>
 
                     <div class="p-3 border-t bg-white flex space-x-2">
-                        <input type="text" id="chat-input-text" placeholder="Escreva onde viu o pet..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
                         <button onclick="sendChatMessage()" class="bg-brand-500 text-white px-5 py-2 rounded text-xs font-medium hover:bg-brand-600 transition shadow">Enviar</button>
                     </div>
                 </div>
@@ -801,7 +808,7 @@
 
             loadMessages();
 
-            // Configura o canal em tempo real para atualizar o chat automaticamente
+            // Configura canal Realtime
             if (window.chatSubscription) {
                 window.supabase.removeChannel(window.chatSubscription);
             }
@@ -820,6 +827,65 @@
                     }
                 })
                 .subscribe();
+        }
+
+        async function loadInboxConversations() {
+            if (!currentUser) return;
+            const inboxContainer = document.getElementById('chat-inbox-list');
+            if (!inboxContainer) return;
+
+            try {
+                const { data, error } = await window.supabase
+                    .from('messages')
+                    .select('*')
+                    .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa encontrada. Vá até o feed e clique em "Falar com o Tutor" em algum alerta.</div>`;
+                    return;
+                }
+
+                // Agrupa conversas por contato único
+                const contactsMap = new Map();
+                data.forEach(msg => {
+                    const isMe = msg.sender_id === currentUser.id;
+                    const contactId = isMe ? msg.recipient_id : msg.sender_id;
+                    const contactName = isMe ? (msg.recipient_name || 'Usuário') : msg.sender_name;
+
+                    if (!contactsMap.has(contactId)) {
+                        contactsMap.set(contactId, {
+                            id: contactId,
+                            name: contactName,
+                            lastMessage: msg.content,
+                            time: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        });
+                    }
+                });
+
+                const contacts = Array.from(contactsMap.values());
+
+                inboxContainer.innerHTML = contacts.map(contact => `
+                    <div onclick="activeChatRecipient = { id: '${contact.id}', name: '${contact.name}' }; renderChatView();" class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-brand-500 cursor-pointer flex items-center justify-between transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
+                                ${contact.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">${contact.name}</h4>
+                                <p class="text-gray-500 truncate max-w-xs">${contact.lastMessage}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400">${contact.time}</span>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error("Erro ao carregar caixa de entrada:", err);
+                inboxContainer.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar lista de conversas.</div>`;
+            }
         }
 
         async function loadMessages() {
