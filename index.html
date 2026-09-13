@@ -382,12 +382,10 @@
             }
         }
 
-        // Sistema robusto de verificação de mensagens (Polling a cada 4 segundos)
         function startMessagePolling() {
             if (!currentUser) return;
             if (notificationInterval) clearInterval(notificationInterval);
 
-            // Verificação inicial rápida
             checkNewMessagesCount(true);
 
             notificationInterval = setInterval(() => {
@@ -410,8 +408,9 @@
                 if (isInitial) {
                     lastKnownMessageCount = totalMessages;
                 } else if (totalMessages > lastKnownMessageCount) {
-                    // Se o número total de mensagens recebidas aumentou, dispara o alerta piscando!
+                    // Dispara a bolinha piscando e o pop-up de notificação flutuante na tela!
                     triggerChatNotificationPulse();
+                    showToast("💬 Você recebeu uma nova mensagem!", "success");
                     lastKnownMessageCount = totalMessages;
                 }
             } catch (err) {
@@ -695,14 +694,14 @@
             const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-[#365314]' };
             const toast = document.createElement('div');
             toast.id = 'auchou-toast';
-            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-2 rounded shadow-xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success}`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i><span>${message}</span>`;
+            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success} transition-all duration-300 transform translate-y-0`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-sm"></i><span>${message}</span>`;
             document.body.appendChild(toast);
 
             setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
         }
 
         async function renderFeed() {
