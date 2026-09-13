@@ -848,12 +848,15 @@
                     return;
                 }
 
-                // Agrupa conversas por contato único
+                // Agrupa conversas por contato único analisando quem mandou e quem recebeu
                 const contactsMap = new Map();
                 data.forEach(msg => {
                     const isMe = msg.sender_id === currentUser.id;
                     const contactId = isMe ? msg.recipient_id : msg.sender_id;
-                    const contactName = isMe ? (msg.recipient_name || 'Usuário') : msg.sender_name;
+                    // Define o nome amigável do contato
+                    const contactName = isMe 
+                        ? (msg.recipient_name || 'Usuário') 
+                        : (msg.sender_name || 'Usuário');
 
                     if (!contactsMap.has(contactId)) {
                         contactsMap.set(contactId, {
@@ -943,6 +946,7 @@
                         sender_id: currentUser.id,
                         sender_name: currentUser.name,
                         recipient_id: activeChatRecipient.id,
+                        recipient_name: activeChatRecipient.name,
                         content: content
                     }]);
 
