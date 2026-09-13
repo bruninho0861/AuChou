@@ -382,6 +382,7 @@
             }
         }
 
+        // Sistema seguro de Verificação Automática (Polling) para notificação
         function startMessagePolling() {
             if (!currentUser) return;
             if (notificationInterval) clearInterval(notificationInterval);
@@ -408,7 +409,6 @@
                 if (isInitial) {
                     lastKnownMessageCount = totalMessages;
                 } else if (totalMessages > lastKnownMessageCount) {
-                    // Dispara a bolinha piscando e o pop-up de notificação flutuante na tela!
                     triggerChatNotificationPulse();
                     showToast("💬 Você recebeu uma nova mensagem!", "success");
                     lastKnownMessageCount = totalMessages;
