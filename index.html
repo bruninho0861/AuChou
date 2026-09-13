@@ -14,8 +14,8 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
         
-        const SUPABASE_URL = 'https://qzyofofhwvhatkeyjckj.supabase.co'
-        const SUPABASE_ANON_KEY = 'sb_publishable_StllbUYVMPLAiRMznRT_tA_D1ejfVr5'
+        const SUPABASE_URL = 'https://upubgrcijudtaitpipax.supabase.co'
+        const SUPABASE_ANON_KEY = 'sb_publishable_XTOMpsiyKBNN0Gj_FGuqdg__0YuMz1V'
         
         window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     </script>
@@ -701,7 +701,7 @@
                 console.error("Erro ao salvar alerta no Supabase:", err);
                 const errorMsg = document.getElementById('post-error-msg');
                 errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
-                errorMsg.classList.remove('hidden');
+                errorMsg.classList.add('hidden');
             } finally {
                 submitBtn.innerText = originalBtnText;
                 submitBtn.disabled = false;
