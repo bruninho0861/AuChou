@@ -635,11 +635,15 @@
                 openAuthModal('login');
                 return;
             }
+            if (!userId || userId === 'undefined') {
+                showToast("Erro: ID do tutor não encontrado neste post.", "error");
+                return;
+            }
             if (userId === currentUser.id) {
                 showToast("Você não pode enviar mensagem para si mesmo.", "error");
                 return;
             }
-            activeChatRecipient = { id: userId, name: userName };
+            activeChatRecipient = { id: userId, name: userName || 'Tutor' };
             switchTab('chats');
         }
 
@@ -778,7 +782,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 text-xs">${activeChatRecipient.name}</h3>
-                                <p class="text-[10px] text-emerald-600 font-medium">Chat ativo</p>
+                                <p class="text-[10px] text-emerald-600 font-medium">Chat em tempo real ativo</p>
                             </div>
                         </div>
                         <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
@@ -796,6 +800,26 @@
             `;
 
             loadMessages();
+
+            // Configura o canal em tempo real para atualizar o chat automaticamente
+            if (window.chatSubscription) {
+                window.supabase.removeChannel(window.chatSubscription);
+            }
+            
+            window.chatSubscription = window.supabase
+                .channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    if (activeChatRecipient && currentUser) {
+                        const msg = payload.new;
+                        if (
+                            (msg.sender_id === currentUser.id && msg.recipient_id === activeChatRecipient.id) ||
+                            (msg.sender_id === activeChatRecipient.id && msg.recipient_id === currentUser.id)
+                        ) {
+                            loadMessages();
+                        }
+                    }
+                })
+                .subscribe();
         }
 
         async function loadMessages() {
@@ -807,17 +831,21 @@
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
-                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatRecipient.id}),and(sender_id.eq.${activeChatRecipient.id},recipient_id.eq.${currentUser.id})`)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma mensagem ainda. Envie a primeira para ajudar o tutor!</div>`;
+                const filteredData = (data || []).filter(msg => 
+                    (msg.sender_id === currentUser.id && msg.recipient_id === activeChatRecipient.id) ||
+                    (msg.sender_id === activeChatRecipient.id && msg.recipient_id === currentUser.id)
+                );
+
+                if (filteredData.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma conversa iniciada com ${activeChatRecipient.name}. Mande a primeira mensagem!</div>`;
                     return;
                 }
 
-                container.innerHTML = data.map(msg => {
+                container.innerHTML = filteredData.map(msg => {
                     const isMe = msg.sender_id === currentUser.id;
                     return `
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
@@ -831,7 +859,7 @@
                 container.scrollTop = container.scrollHeight;
             } catch (err) {
                 console.error("Erro ao carregar mensagens:", err);
-                container.innerHTML = `<div class="text-center text-red-500">Erro ao carregar mensagens do chat.</div>`;
+                container.innerHTML = `<div class="text-center text-red-500">Erro ao carregar mensagens.</div>`;
             }
         }
 
@@ -852,7 +880,11 @@
                         content: content
                     }]);
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Erro retornado pelo Supabase:", error);
+                    showToast("Erro ao enviar: " + error.message, "error");
+                    return;
+                }
                 loadMessages();
             } catch (err) {
                 console.error("Erro ao enviar mensagem:", err);
