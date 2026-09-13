@@ -77,7 +77,7 @@
                 <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
                 <button onclick="switchTab('chats')" id="nav-chat-btn" class="px-3 py-1.5 hover:bg-white/10 rounded transition relative flex items-center space-x-1.5">
                     <span>Mensagens</span>
-                    <span id="chat-notification-dot" class="w-2 h-2 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
+                    <span id="chat-notification-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
                 </button>
                 <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
             </div>
@@ -325,6 +325,8 @@
         let allRegisteredUsers = [];
         let postMap = null;
         let postMarker = null;
+        let lastKnownMessageCount = 0;
+        let notificationInterval = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const checkSupabaseReady = setInterval(async () => {
@@ -334,7 +336,7 @@
                     const { data: { session } } = await window.supabase.auth.getSession();
                     if (session) {
                         await fetchUserProfile(session.user);
-                        setupGlobalChatListener();
+                        startMessagePolling();
                     }
                     await fetchAllUsers();
                     updateNavigationUI();
@@ -380,26 +382,41 @@
             }
         }
 
-        // Listener global de mensagens em tempo real robusto
-        function setupGlobalChatListener() {
+        // Sistema robusto de verificação de mensagens (Polling a cada 4 segundos)
+        function startMessagePolling() {
             if (!currentUser) return;
-            if (window.globalChatSub) {
-                window.supabase.removeChannel(window.globalChatSub);
-            }
+            if (notificationInterval) clearInterval(notificationInterval);
 
-            window.globalChatSub = window.supabase
-                .channel('public:messages:global')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                    const msg = payload.new;
-                    // Se a mensagem foi enviada para mim por outra pessoa
-                    if (msg.recipient_id === currentUser.id && msg.sender_id !== currentUser.id) {
-                        // Se eu não estou com o chat aberto com essa pessoa específica
-                        if (!activeChatRecipient || activeChatRecipient.id !== msg.sender_id) {
-                            triggerChatNotificationPulse();
-                        }
-                    }
-                })
-                .subscribe();
+            // Verificação inicial rápida
+            checkNewMessagesCount(true);
+
+            notificationInterval = setInterval(() => {
+                checkNewMessagesCount(false);
+            }, 4000);
+        }
+
+        async function checkNewMessagesCount(isInitial = false) {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await window.supabase
+                    .from('messages')
+                    .select('id, recipient_id')
+                    .eq('recipient_id', currentUser.id);
+
+                if (error) return;
+
+                const totalMessages = data ? data.length : 0;
+
+                if (isInitial) {
+                    lastKnownMessageCount = totalMessages;
+                } else if (totalMessages > lastKnownMessageCount) {
+                    // Se o número total de mensagens recebidas aumentou, dispara o alerta piscando!
+                    triggerChatNotificationPulse();
+                    lastKnownMessageCount = totalMessages;
+                }
+            } catch (err) {
+                console.error("Erro ao checar mensagens:", err);
+            }
         }
 
         function triggerChatNotificationPulse() {
@@ -652,7 +669,7 @@
                 } else {
                     await fetchUserProfile(data.user);
                     await fetchAllUsers();
-                    setupGlobalChatListener();
+                    startMessagePolling();
                     closeModal('modal-auth');
                     updateNavigationUI();
                     renderFeed();
@@ -662,6 +679,7 @@
         }
 
         async function handleLogout() {
+            if (notificationInterval) clearInterval(notificationInterval);
             await window.supabase.auth.signOut();
             currentUser = null;
             isAdminLoggedIn = false;
@@ -1093,7 +1111,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 text-xs">${activeChatRecipient.name}</h3>
-                                <p class="text-[10px] text-emerald-600 font-medium">Chat em tempo real ativo</p>
+                                <p class="text-[10px] text-emerald-600 font-medium">Chat ativo</p>
                             </div>
                         </div>
                         <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
@@ -1111,25 +1129,6 @@
             `;
 
             loadMessages();
-
-            if (window.chatSubscription) {
-                window.supabase.removeChannel(window.chatSubscription);
-            }
-            
-            window.chatSubscription = window.supabase
-                .channel('public:messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                    if (activeChatRecipient && currentUser) {
-                        const msg = payload.new;
-                        if (
-                            (msg.sender_id === currentUser.id && msg.recipient_id === activeChatRecipient.id) ||
-                            (msg.sender_id === activeChatRecipient.id && msg.recipient_id === currentUser.id)
-                        ) {
-                            loadMessages();
-                        }
-                    }
-                })
-                .subscribe();
         }
 
         async function loadInboxConversations() {
