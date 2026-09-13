@@ -770,7 +770,7 @@
             else if (tab === 'chats') renderChatView();
         }
 
-        function renderProfileView() {
+        async function renderProfileView() {
             if (!currentUser) { openAuthModal('login'); return; }
             const appView = document.getElementById('app-view');
             appView.innerHTML = `
