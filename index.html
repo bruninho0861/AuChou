@@ -390,7 +390,7 @@
 
             notificationInterval = setInterval(() => {
                 checkNewMessagesCount(false);
-            }, 4000);
+            }, 3000);
         }
 
         async function checkNewMessagesCount(isInitial = false) {
@@ -411,6 +411,15 @@
                     triggerChatNotificationPulse();
                     showToast("💬 Você recebeu uma nova mensagem!", "success");
                     lastKnownMessageCount = totalMessages;
+                    
+                    // Se estiver com o chat aberto na tela de conversas ou na conversa ativa, atualiza em tempo real
+                    if (currentActiveTab === 'chats') {
+                        if (activeChatRecipient) {
+                            loadMessages();
+                        } else {
+                            loadInboxConversations();
+                        }
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao checar mensagens:", err);
@@ -1195,21 +1204,17 @@
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
+                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatRecipient.id}),and(sender_id.eq.${activeChatRecipient.id},recipient_id.eq.${currentUser.id})`)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
 
-                const filteredData = (data || []).filter(msg => 
-                    (msg.sender_id === currentUser.id && msg.recipient_id === activeChatRecipient.id) ||
-                    (msg.sender_id === activeChatRecipient.id && msg.recipient_id === currentUser.id)
-                );
-
-                if (filteredData.length === 0) {
+                if (!data || data.length === 0) {
                     container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma mensagem trocada ainda com ${activeChatRecipient.name}.</div>`;
                     return;
                 }
 
-                container.innerHTML = filteredData.map(msg => {
+                container.innerHTML = data.map(msg => {
                     const isMe = msg.sender_id === currentUser.id;
                     return `
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
