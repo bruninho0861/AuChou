@@ -1,0 +1,20 @@
+{
+  "name": "AuChou Pets",
+  "short_name": "AuChou",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f0",
+  "theme_color": "#365314",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
