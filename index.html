@@ -1228,29 +1228,30 @@
         }
 
         async function sendChatMessage() {
-            const input = document.getElementById('chat-input-text');
-            const content = input?.value.trim();
-            if (!content || !activeChatRecipient || !currentUser) return;
+    const input = document.getElementById('chat-input-text');
+    const content = input?.value.trim();
+    if (!content || !activeChatRecipient || !currentUser) return;
 
-            input.value = '';
+    input.value = '';
 
-            try {
-                const { error } = await window.supabase
-                    .from('messages')
-                    .insert([{
-                        sender_id: currentUser.id,
-                        sender_name: currentUser.name,
-                        recipient_id: activeChatRecipient.id,
-                        recipient_name: activeChatRecipient.name,
-                        content: content
-                    }]);
+    try {
+        const { error } = await window.supabase
+            .from('messages')
+            .insert([{
+                sender_id: currentUser.id,
+                sender_name: currentUser.name,
+                recipient_id: activeChatRecipient.id,
+                recipient_name: activeChatRecipient.name,
+                content: content
+            }]);
 
-                if (error) throw error;
-                loadMessages();
-            } catch (err) {
-                showToast("Erro ao enviar mensagem.", "error");
-            }
-        }
+        if (error) throw error;
+        loadMessages();
+    } catch (err) {
+        console.error("Erro ao enviar mensagem:", err);
+        showToast("Erro ao enviar mensagem.", "error");
+    }
+}
     </script>
 </body>
 </html>
