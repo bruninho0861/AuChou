@@ -25,128 +25,129 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#fdf4f0',
-                            100: '#fbe8e1',
-                            500: '#e07a5f',
-                            600: '#cc6546',
-                            700: '#ad5034'
+                            50: '#f4fbf4',
+                            100: '#e2f7e2',
+                            500: '#65a30d', /* Verde lima / oliva vibrante */
+                            600: '#4d7c0f',
+                            700: '#3f6212'
                         },
-                        secondary: '#3d405b',
-                        accent: '#81b29a',
-                        orkutBg: '#f2f5f9',
-                        orkutCard: '#ffffff',
-                        orkutHeader: '#af2a66'
+                        secondary: '#166534',
+                        accent: '#eab308', /* Amarelo limão / dourado */
+                        siteBg: '#f4f6f0',
+                        headerBg: '#365314'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f2f5f9; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f6f0; color: #1c1917; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="text-gray-800 min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between">
 
-    <header class="bg-gradient-to-r from-secondary to-brand-700 text-white shadow-md sticky top-0 z-40">
+    <header class="bg-[#365314] text-white shadow-md sticky top-0 z-45">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
             <!-- Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('feed')">
-                <div class="w-8 h-8 rounded-lg bg-white text-brand-600 flex items-center justify-center font-bold text-lg shadow">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('feed')">
+                <div class="w-8 h-8 rounded-full bg-[#eab308] text-[#365314] flex items-center justify-center font-black shadow">
                     <i class="fa-solid fa-paw"></i>
                 </div>
-                <h1 class="text-lg font-bold tracking-tight">AuChou</h1>
+                <h1 class="text-xl font-black tracking-tight text-white">AuChou <span class="text-xs font-normal text-[#eab308]">Pets</span></h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center space-x-1 text-xs font-semibold">
+                <button onclick="switchTab('feed')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Início</button>
+                <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
+                <button onclick="switchTab('chats')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Mensagens</button>
+                <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
             </div>
 
             <!-- Search Header -->
-            <div class="hidden md:flex items-center flex-1 max-w-sm mx-6">
-                <div class="relative w-full">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div class="flex items-center space-x-2">
+                <div class="relative">
+                    <input type="text" id="global-search-input" oninput="renderFeed()" placeholder="pesquisar pets..." class="pl-3 pr-8 py-1.5 bg-white text-gray-800 rounded text-xs focus:outline-none w-36 sm:w-48 shadow-inner">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 pointer-events-none">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
-                    <input type="text" id="global-search-input" oninput="renderFeed()" placeholder="pesquisar no auchou..." class="w-full pl-9 pr-3 py-1 bg-white text-gray-800 rounded text-xs focus:outline-none">
                 </div>
-            </div>
-
-            <!-- Right Actions -->
-            <div class="flex items-center space-x-3 text-xs font-medium" id="nav-actions">
-                <!-- Injected dynamically -->
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-6">
         <!-- Visitor Banner if not logged in -->
-        <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-gray-200 flex flex-col md:flex-row items-center justify-between">
+        <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-lime-200 flex flex-col md:flex-row items-center justify-between">
             <div class="mb-4 md:mb-0">
-                <h2 class="text-xl font-bold text-gray-900 mb-1">Novo por aqui ou quer interagir?</h2>
-                <p class="text-gray-600 text-xs">Cadastre-se ou entre com sua conta pessoal para curtir, comentar e conversar com tutores.</p>
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets!</h2>
+                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores e publicar alertas de resgate.</p>
             </div>
             <div class="flex space-x-3">
-                <button onclick="openAuthModal('login')" class="bg-brand-500 text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-brand-600 transition">Entrar</button>
+                <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar</button>
                 <button onclick="openAuthModal('register')" class="bg-gray-100 text-gray-800 px-5 py-2 rounded-lg font-medium text-xs border border-gray-300 hover:bg-gray-200 transition">Cadastre-se</button>
             </div>
         </div>
 
-        <!-- Main Dynamic View Container -->
         <div id="app-view">
             <!-- Feed or active tab content gets injected here -->
         </div>
     </main>
 
     <footer class="bg-white border-t border-gray-200 mt-12 py-4 text-center text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados. Rede Social Acadêmica.</p>
-            <div class="flex space-x-6">
-                <a href="#" onclick="showAboutModal(); return false;" class="hover:text-brand-600 transition">Sobre o Projeto</a>
-                <a href="#" onclick="showPrivacyModal(); return false;" class="hover:text-brand-600 transition">Privacidade e Segurança</a>
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados.</p>
+            <div class="flex space-x-4">
+                <a href="#" onclick="showAboutModal(); return false;" class="text-lime-700 hover:underline">Sobre o Projeto</a>
+                <a href="#" onclick="showPrivacyModal(); return false;" class="text-lime-700 hover:underline">Privacidade</a>
             </div>
         </div>
     </footer>
 
-    <!-- Modais de Autenticação -->
+    <!-- Auth Modal -->
     <div id="modal-auth" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative transform transition-all">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-lime-200">
             <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2 text-xl">
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 rounded-full bg-lime-100 text-[#365314] flex items-center justify-center mx-auto mb-2 text-xl font-bold">
                     <i class="fa-solid fa-paw"></i>
                 </div>
-                <h3 id="auth-modal-title" class="text-xl font-bold text-gray-900">Entrar no AuChou</h3>
-                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Conecte-se para ajudar animais perdidos</p>
+                <h3 id="auth-modal-title" class="text-lg font-bold text-gray-900">Entrar no AuChou</h3>
+                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Conecte-se com sua rede de tutores e pets</p>
             </div>
 
             <form id="auth-form" onsubmit="handleAuthSubmit(event)">
-                <div id="auth-name-field" class="mb-4 hidden">
+                <div id="auth-name-field" class="mb-3 hidden">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome Completo</label>
-                    <input type="text" id="auth-name" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                    <input type="text" id="auth-name" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">E-mail</label>
-                    <input type="email" id="auth-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" placeholder="seu@email.com">
+                    <input type="email" id="auth-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="seu@email.com">
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Senha</label>
-                    <input type="password" id="auth-password" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" placeholder="••••••••">
+                    <input type="password" id="auth-password" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="••••••••">
                     <p id="password-hint" class="text-[11px] text-gray-500 mt-1 hidden">Mínimo 8 caracteres, 1 letra maiúscula e 1 caractere especial (!@#$%...).</p>
                 </div>
                 
-                <div id="auth-error-msg" class="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded hidden"></div>
+                <div id="auth-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
 
-                <button type="submit" id="auth-submit-btn" class="w-full bg-brand-500 text-white font-medium py-2 rounded text-xs hover:bg-brand-600 transition shadow">Entrar</button>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Entrar</button>
             </form>
 
             <div class="mt-4 text-center">
                 <p id="auth-switch-text" class="text-xs text-gray-600">
-                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-brand-600 font-semibold hover:underline">Cadastre-se</a>
+                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>
                 </p>
                 <p id="forgot-password-link-wrap" class="text-xs text-gray-600 mt-2">
-                    <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-gray-500 hover:text-brand-600 hover:underline">Esqueceu sua senha?</a>
+                    <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-gray-500 hover:text-lime-700 hover:underline">Esqueceu sua senha?</a>
                 </p>
             </div>
         </div>
@@ -154,65 +155,65 @@
 
     <!-- Modal Esqueceu a Senha -->
     <div id="modal-forgot" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-lime-200">
             <button onclick="closeModal('modal-forgot')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <div class="text-center mb-6">
+            <div class="text-center mb-5">
                 <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2 text-xl">
                     <i class="fa-solid fa-key"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">Recuperação de Senha Segura</h3>
-                <p id="forgot-subtitle" class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado para receber o link de redefinição</p>
+                <h3 class="text-lg font-bold text-gray-900">Recuperação de Senha</h3>
+                <p class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado</p>
             </div>
 
             <form id="forgot-step1-form" onsubmit="handleSupabasePasswordReset(event)">
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">E-mail Cadastrado</label>
-                    <input type="email" id="forgot-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" placeholder="seu@email.com">
+                    <input type="email" id="forgot-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="seu@email.com">
                 </div>
-                <div id="forgot-error-msg-1" class="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded hidden"></div>
-                <button type="submit" class="w-full bg-brand-500 text-white font-medium py-2 rounded text-xs hover:bg-brand-600 transition shadow">Enviar Link de Recuperação</button>
+                <div id="forgot-error-msg-1" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
+                <button type="submit" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Enviar Link de Recuperação</button>
             </form>
 
             <div class="mt-4 text-center">
-                <a href="#" onclick="backToLoginFromForgot(); return false;" class="text-xs text-brand-600 font-semibold hover:underline">Voltar para o login</a>
+                <a href="#" onclick="backToLoginFromForgot(); return false;" class="text-xs text-lime-700 font-semibold hover:underline">Voltar para o login</a>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Publicação de Alertas -->
+    <!-- Modal Criar/Editar Alerta -->
     <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8">
+        <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8 border border-lime-200">
             <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <h3 id="post-modal-title" class="text-xl font-bold text-gray-900 mb-4">Criar Alerta de Pet</h3>
+            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900 mb-4">Criar Alerta de Pet</h3>
 
             <form id="post-form" onsubmit="handlePostSubmit(event)">
                 <input type="hidden" id="post-edit-id">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Categoria / Tipo de Alerta</label>
-                        <select id="post-category" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-brand-500">
+                        <select id="post-category" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
                             <option value="Cão Perdido">Cão Perdido</option>
                             <option value="Cão Achado">Cão Achado</option>
                             <option value="Gato Perdido">Gato Perdido</option>
                             <option value="Gato Achado">Gato Achado</option>
-                            <option value="Outros Pets - Perdido">Outros Pets (Aves, Coelhos...) - Perdido</option>
-                            <option value="Outros Pets - Achado">Outros Pets (Aves, Coelhos...) - Achado</option>
+                            <option value="Outros Pets - Perdido">Outros Pets - Perdido</option>
+                            <option value="Outros Pets - Achado">Outros Pets - Achado</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome do Pet (se conhecido)</label>
-                        <input type="text" id="post-pet-name" placeholder="Ex: Mel, Thor, Desconhecido" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                        <input type="text" id="post-pet-name" placeholder="Ex: Mel, Thor" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Espécie</label>
-                        <select id="post-species" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-brand-500">
+                        <select id="post-species" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
                             <option value="Cão">Cão</option>
                             <option value="Gato">Gato</option>
                             <option value="Outro">Outro</option>
@@ -220,11 +221,11 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Raça</label>
-                        <input type="text" id="post-breed" required placeholder="Ex: Poodle, SRD" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                        <input type="text" id="post-breed" required placeholder="Ex: Poodle, SRD" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Porte</label>
-                        <select id="post-size" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-brand-500">
+                        <select id="post-size" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
                             <option value="Pequeno">Pequeno</option>
                             <option value="Médio">Médio</option>
                             <option value="Grande">Grande</option>
@@ -232,51 +233,61 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Cor Predominante</label>
-                        <input type="text" id="post-color" required placeholder="Ex: Marrom e Branco" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                        <input type="text" id="post-color" required placeholder="Ex: Marrom e Branco" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Local Aproximado (Bairro/Cidade)</label>
-                        <input type="text" id="post-location" required placeholder="Ex: Centro, Itapetininga - SP" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                        <input type="text" id="post-location" required placeholder="Ex: Centro, Itapetininga - SP" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Data e Horário</label>
-                        <input type="datetime-local" id="post-datetime" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                        <input type="datetime-local" id="post-datetime" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Status do Anúncio</label>
-                        <select id="post-status" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-brand-500">
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Status</label>
+                        <select id="post-status" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
                             <option value="Procurando">Procurando / Ativo</option>
                             <option value="Reunido">Reunido com a Família / Solucionado</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Foto do Animal (Redimensionamento Automático)</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="file" id="post-photo-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" onchange="handleImageResize(event, 800, 'post-photo-url')">
-                    </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Foto do Animal</label>
+                    <input type="file" id="post-photo-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-lime-100 file:text-lime-800 hover:file:bg-lime-200" onchange="handleImageResize(event, 800, 'post-photo-url')">
                     <input type="hidden" id="post-photo-url">
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Características Marcantes e Descrição</label>
-                    <textarea id="post-desc" rows="3" required placeholder="Coleira azul, mancha na orelha direita, dócil..." class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500"></textarea>
+                    <textarea id="post-desc" rows="3" required placeholder="Coleira azul, mancha na orelha direita..." class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]"></textarea>
                 </div>
 
-                <div id="post-error-msg" class="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded hidden"></div>
+                <div id="post-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
 
-                <div class="flex justify-end space-x-3">
+                <div class="flex justify-end space-x-2">
                     <button type="button" onclick="closeModal('modal-post')" class="px-4 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
-                    <button type="submit" class="px-6 py-2 bg-brand-500 text-white font-medium rounded text-xs hover:bg-brand-600 transition shadow">Publicar Alerta</button>
+                    <button type="submit" class="px-5 py-2 bg-[#365314] text-white font-medium rounded text-xs hover:bg-lime-900 transition shadow">Publicar Alerta</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para Visualizar Perfil de Outro Usuário -->
+    <div id="modal-view-profile" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative text-center border border-lime-200">
+            <button onclick="closeModal('modal-view-profile')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="view-profile-content">
+                <!-- Conteúdo injetado via JS -->
+            </div>
         </div>
     </div>
 
@@ -288,6 +299,7 @@
         let currentActiveTab = 'feed';
         let activeChatRecipient = null;
         let isRegisterMode = false;
+        let allRegisteredUsers = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             const checkSupabaseReady = setInterval(async () => {
@@ -298,13 +310,50 @@
                     if (session) {
                         await fetchUserProfile(session.user);
                     }
+                    await fetchAllUsers();
                     updateNavigationUI();
                     renderFeed();
                 }
             }, 100);
         });
 
-        // Função universal de redimensionamento e corte automático (quadrado/proporcional) para evitar fotos pesadas de celulares
+        async function fetchAllUsers() {
+            try {
+                const { data, error } = await window.supabase
+                    .from('posts')
+                    .select('user_id, user_name, user_avatar, location');
+
+                if (error) throw error;
+                
+                const uniqueMap = new Map();
+                if (data) {
+                    data.forEach(p => {
+                        if (p.user_id && !uniqueMap.has(p.user_id)) {
+                            uniqueMap.set(p.user_id, {
+                                id: p.user_id,
+                                name: p.user_name || 'Usuário AuChou',
+                                avatar: p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+                                region: p.location || 'Itapetininga - SP'
+                            });
+                        }
+                    });
+                }
+                
+                if (currentUser && !uniqueMap.has(currentUser.id)) {
+                    uniqueMap.set(currentUser.id, {
+                        id: currentUser.id,
+                        name: currentUser.name,
+                        avatar: currentUser.avatar,
+                        region: currentUser.region
+                    });
+                }
+
+                allRegisteredUsers = Array.from(uniqueMap.values());
+            } catch (err) {
+                console.error("Erro ao carregar usuários:", err);
+            }
+        }
+
         function handleImageResize(event, maxDimension, targetInputId, previewImgId = null) {
             const file = event.target.files[0];
             if (!file) return;
@@ -318,7 +367,6 @@
                     let height = img.height;
 
                     if (maxDimension === 400) {
-                        // Corte central quadrado perfeito para foto de perfil
                         const size = Math.min(width, height);
                         canvas.width = 400;
                         canvas.height = 400;
@@ -327,7 +375,6 @@
                         const startY = (height - size) / 2;
                         ctx.drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
                     } else {
-                        // Redimensionamento proporcional padrão para fotos de pets no feed
                         if (width > height) {
                             if (width > maxDimension) {
                                 height = Math.round((height * maxDimension) / width);
@@ -345,9 +392,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
                     }
 
-                    // Compressão em JPEG otimizado
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
                     document.getElementById(targetInputId).value = compressedDataUrl;
 
                     if (previewImgId) {
@@ -366,38 +411,18 @@
                 name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
                 email: authUser.email,
                 avatar: authUser.user_metadata?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-                bio: authUser.user_metadata?.bio || 'Membro da comunidade AuChou.',
+                bio: authUser.user_metadata?.bio || 'Membro da comunidade AuChou Pets.',
                 region: authUser.user_metadata?.region || 'Itapetininga - SP'
             };
             if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
         }
 
         function updateNavigationUI() {
-            const navActions = document.getElementById('nav-actions');
             const visitorBanner = document.getElementById('visitor-banner');
-
             if (currentUser) {
                 if (visitorBanner) visitorBanner.classList.add('hidden');
-                
-                let adminBadge = '';
-                if (currentUser.email === ADMIN_EMAIL || isAdminLoggedIn) {
-                    adminBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>`;
-                }
-
-                navActions.innerHTML = `
-                    ${adminBadge}
-                    <button onclick="switchTab('feed')" class="hover:underline">Home</button>
-                    <button onclick="switchTab('profile')" class="hover:underline">Profile</button>
-                    <button onclick="switchTab('chats')" class="hover:underline">Mensagens / Chat</button>
-                    <button onclick="openPostModal()" class="bg-white text-brand-700 px-3 py-1 rounded font-bold shadow hover:bg-brand-50 transition">Novo Alerta</button>
-                    <button onclick="handleLogout()" class="text-brand-100 hover:text-white" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
-                `;
             } else {
                 if (visitorBanner) visitorBanner.classList.remove('hidden');
-                navActions.innerHTML = `
-                    <button onclick="openAuthModal('login')" class="bg-white text-brand-700 px-3 py-1 rounded font-bold shadow hover:bg-brand-50 transition">Entrar</button>
-                    <button onclick="openAuthModal('register')" class="bg-brand-600 text-white px-3 py-1 rounded font-bold hover:bg-brand-700 transition">Cadastre-se</button>
-                `;
             }
         }
 
@@ -417,10 +442,10 @@
             if (mode === 'register') {
                 isRegisterMode = true;
                 titleEl.innerText = 'Criar Conta no AuChou';
-                subtitleEl.innerText = 'Cadastre-se para interagir e ajudar pets';
+                subtitleEl.innerText = 'Cadastre-se para interagir na rede';
                 nameField.classList.remove('hidden');
                 submitBtn.innerText = 'Cadastrar';
-                switchText.innerHTML = `Já tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-brand-600 font-semibold hover:underline">Entrar</a>`;
+                switchText.innerHTML = `Já tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Entrar</a>`;
                 passwordHint.classList.remove('hidden');
             } else {
                 isRegisterMode = false;
@@ -428,7 +453,7 @@
                 subtitleEl.innerText = 'Conecte-se para ajudar animais perdidos';
                 nameField.classList.add('hidden');
                 submitBtn.innerText = 'Entrar';
-                switchText.innerHTML = `Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-brand-600 font-semibold hover:underline">Cadastre-se</a>`;
+                switchText.innerHTML = `Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>`;
                 passwordHint.classList.add('hidden');
             }
 
@@ -515,6 +540,7 @@
                     errorEl.classList.remove('hidden');
                 } else {
                     await fetchUserProfile(data.user);
+                    await fetchAllUsers();
                     closeModal('modal-auth');
                     updateNavigationUI();
                     renderFeed();
@@ -536,7 +562,7 @@
             const existingToast = document.getElementById('auchou-toast');
             if (existingToast) existingToast.remove();
 
-            const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-secondary' };
+            const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-[#365314]' };
             const toast = document.createElement('div');
             toast.id = 'auchou-toast';
             toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-2 rounded shadow-xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success}`;
@@ -555,8 +581,8 @@
             
             appView.innerHTML = `
                 <div class="flex flex-col justify-center items-center py-20">
-                    <i class="fa-solid fa-spinner fa-spin text-brand-500 text-4xl mb-3"></i>
-                    <span class="text-gray-500 font-medium">Buscando alertas na comunidade...</span>
+                    <i class="fa-solid fa-spinner fa-spin text-lime-600 text-4xl mb-3"></i>
+                    <span class="text-gray-500 font-medium">Carregando feed...</span>
                 </div>
             `;
 
@@ -571,8 +597,9 @@
                 posts = data || [];
             } catch (err) {
                 console.error("Erro ao carregar os posts:", err);
-                showToast("Falha na conexão com o banco de dados.", "error");
             }
+
+            await fetchAllUsers();
 
             const normalizedPosts = posts.map(p => ({
                 id: p.id,
@@ -589,7 +616,6 @@
                 status: p.status,
                 photo: p.photo,
                 description: p.description,
-                likes: p.likes || [],
                 createdAt: p.created_at || p.createdAt,
                 petName: p.pet_name || p.petName
             }));
@@ -604,45 +630,101 @@
                 return true;
             });
 
-            if (currentUser) {
-                appView.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        <div class="md:col-span-1 space-y-4">
-                            <div class="bg-white rounded p-4 shadow-sm border border-gray-200 text-center">
-                                <img src="${currentUser.avatar}" alt="${currentUser.name}" class="w-24 h-24 rounded mx-auto object-cover mb-2 border shadow-sm">
-                                <h3 class="font-bold text-sm text-brand-600">${currentUser.name}</h3>
-                                <p class="text-[11px] text-gray-500 mb-3"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
-                                <div class="text-left text-xs space-y-1.5 border-t border-gray-100 pt-2 text-gray-700">
-                                    <p><a href="#" onclick="switchTab('profile'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-user mr-1.5 w-4"></i> meu perfil</a></p>
-                                    <p><a href="#" onclick="switchTab('chats'); return false;" class="hover:underline text-brand-600"><i class="fa-solid fa-comments mr-1.5 w-4"></i> mensagens / chat</a></p>
-                                </div>
+            const myAvatar = currentUser ? currentUser.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+            const myName = currentUser ? currentUser.name : 'Visitante';
+            const myRegion = currentUser ? currentUser.region : 'Itapetininga - SP';
+
+            const sidebarUsers = allRegisteredUsers.slice(0, 9);
+
+            appView.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-start">
+                    
+                    <!-- Coluna Esquerda: Perfil e Atalhos -->
+                    <div class="md:col-span-1 space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-center">
+                            <img src="${myAvatar}" alt="${myName}" class="w-24 h-24 rounded-full mx-auto object-cover mb-2 border-2 border-lime-500 shadow-sm">
+                            <h3 class="font-bold text-xs text-lime-800">${myName}</h3>
+                            <p class="text-[10px] text-gray-500 mb-3"><i class="fa-solid fa-location-dot mr-1"></i>${myRegion}</p>
+                            
+                            <div class="text-left text-[11px] space-y-2 border-t border-gray-100 pt-3 text-gray-700 font-medium">
+                                <p><a href="#" onclick="switchTab('profile'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-user mr-2 w-4 text-center"></i> meu perfil</a></p>
+                                <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens</a></p>
+                                <p><a href="#" onclick="openPostModal(); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-bullhorn mr-2 w-4 text-center"></i> criar alerta</a></p>
+                                ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar</a></p>`}
                             </div>
                         </div>
-                        <div class="md:col-span-2 lg:col-span-3 space-y-4">
-                            <div class="bg-white rounded p-3 shadow-sm border border-gray-200 flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-700">Feed de Alertas (${filteredPosts.length})</span>
-                                <button onclick="openPostModal()" class="bg-brand-500 text-white px-3 py-1 rounded text-xs font-medium shadow hover:bg-brand-600">Novo Alerta</button>
-                            </div>
-                            <div id="posts-container" class="space-y-4">
-                                ${filteredPosts.length === 0 ? `<div class="bg-white rounded p-8 text-center border border-gray-200"><p class="text-xs text-gray-500">Nenhum pet encontrado.</p></div>` : filteredPosts.map(post => renderPostCard(post)).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                appView.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        <div class="lg:col-span-3 space-y-6">
-                            <div class="flex items-center justify-between bg-white px-5 py-3 rounded-xl shadow-sm border border-gray-200 text-xs font-semibold text-gray-700">
-                                <span>Publicações Recentes (${filteredPosts.length})</span>
-                            </div>
-                            <div id="posts-container" class="space-y-6">
-                                ${filteredPosts.length === 0 ? `<div class="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-200"><h3 class="text-base font-bold text-gray-900 mb-1">Nenhum pet encontrado</h3></div>` : filteredPosts.map(post => renderPostCard(post)).join('')}
-                            </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-xs">
+                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Comunidades Pet</h4>
+                            <ul class="space-y-1.5 text-[11px] text-lime-700 font-medium">
+                                <li><a href="#" onclick="showToast('Comunidade: Amigos dos Pets Perdidos', 'info'); return false;" class="hover:underline">• Amigos dos Pets</a></li>
+                                <li><a href="#" onclick="showToast('Comunidade: Resgate Itapetininga', 'info'); return false;" class="hover:underline">• Resgate Itapetininga</a></li>
+                                <li><a href="#" onclick="showToast('Comunidade: Adote com Amor', 'info'); return false;" class="hover:underline">• Adote com Amor</a></li>
+                            </ul>
                         </div>
                     </div>
-                `;
-            }
+
+                    <!-- Coluna Central: Feed de Alertas -->
+                    <div class="md:col-span-2 lg:col-span-3 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-800">Alertas Recentes (${filteredPosts.length})</span>
+                            <button onclick="openPostModal()" class="bg-[#365314] text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow hover:bg-lime-900">Novo Alerta</button>
+                        </div>
+                        <div id="posts-container" class="space-y-4">
+                            ${filteredPosts.length === 0 ? `<div class="bg-white rounded-xl p-8 text-center border border-lime-200"><p class="text-xs text-gray-500">Nenhum pet encontrado.</p></div>` : filteredPosts.map(post => renderPostCard(post)).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Coluna Direita: Perfis de Usuários (Clicáveis para interagir!) -->
+                    <div class="md:col-span-1 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200">
+                            <div class="flex items-center justify-between mb-3 border-b pb-1.5">
+                                <h4 class="font-bold text-xs text-gray-800">Membros (${allRegisteredUsers.length})</h4>
+                                <span class="text-[10px] text-lime-700 cursor-pointer font-medium" onclick="showToast('Exibindo todos os membros cadastrados', 'info')">ver todos</span>
+                            </div>
+
+                            <!-- Grade de Fotos Estilo Grade com Interação ao Clicar -->
+                            <div class="grid grid-cols-3 gap-2.5">
+                                ${sidebarUsers.length === 0 ? `
+                                    <div class="col-span-3 text-center text-gray-400 py-6 text-[11px]">Nenhum membro cadastrado ainda.</div>
+                                ` : sidebarUsers.map(u => `
+                                    <div class="text-center cursor-pointer group" onclick="viewUserProfileCard('${u.id}', '${u.name}', '${u.avatar}', '${u.region}')" title="Ver perfil de ${u.name}">
+                                        <div class="w-16 h-16 mx-auto rounded-lg overflow-hidden border border-lime-300 bg-gray-100 shadow-sm">
+                                            <img src="${u.avatar}" alt="${u.name}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                                        </div>
+                                        <p class="text-[10px] text-lime-800 truncate mt-1 group-hover:underline font-semibold">${u.name.split(' ')[0]}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-xs">
+                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Recados (0)</h4>
+                            <p class="text-[11px] text-gray-500 italic">Nenhum recado pendente.</p>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function viewUserProfileCard(userId, userName, userAvatar, userRegion) {
+            const modal = document.getElementById('modal-view-profile');
+            const content = document.getElementById('view-profile-content');
+            
+            content.innerHTML = `
+                <img src="${userAvatar}" alt="${userName}" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-lime-500 shadow-md mb-3">
+                <h3 class="font-bold text-base text-gray-900">${userName}</h3>
+                <p class="text-xs text-gray-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${userRegion}</p>
+                <p class="text-xs text-gray-600 mb-4 bg-lime-50 p-2.5 rounded border border-lime-100">Membro da rede AuChou Pets dedicado a auxiliar na localização e resgate de animais.</p>
+                <div class="flex space-x-2">
+                    <button onclick="closeModal('modal-view-profile'); startChatWith('${userId}', '${userName}');" class="flex-1 bg-[#365314] text-white py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">
+                        <i class="fa-solid fa-comment mr-1"></i> Enviar Mensagem
+                    </button>
+                    <button onclick="closeModal('modal-view-profile')" class="px-3 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50">Fechar</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
         }
 
         function renderPostCard(post) {
@@ -663,17 +745,17 @@
             }
 
             return `
-                <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden text-xs">
-                    <div class="p-3 flex items-center justify-between border-b border-gray-100 bg-gray-50">
-                        <div class="flex items-center space-x-2">
-                            <img src="${post.userAvatar}" alt="${post.userName}" class="w-8 h-8 rounded-full object-cover">
+                <div class="bg-white rounded-xl shadow-sm border border-lime-200 overflow-hidden text-xs">
+                    <div class="p-3.5 flex items-center justify-between border-b border-gray-100 bg-[#f9faf6]">
+                        <div class="flex items-center space-x-2.5 cursor-pointer" onclick="viewUserProfileCard('${post.userId}', '${post.userName}', '${post.userAvatar}', '${post.location}')">
+                            <img src="${post.userAvatar}" alt="${post.userName}" class="w-9 h-9 rounded-full object-cover border border-lime-300">
                             <div>
-                                <h4 class="font-bold text-gray-900">${post.userName}</h4>
+                                <h4 class="font-bold text-gray-900 hover:underline">${post.userName}</h4>
                                 <p class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-100 text-brand-700">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-lime-100 text-lime-800">
                                 ${post.category}
                             </span>
                             ${deleteButtonHtml}
@@ -682,14 +764,14 @@
                     <div class="relative bg-gray-100 max-h-80 overflow-hidden cursor-pointer">
                         <img src="${post.photo}" alt="${post.breed}" class="w-full h-full object-cover max-h-80">
                     </div>
-                    <div class="p-3">
+                    <div class="p-4">
                         ${post.petName ? `<p class="font-bold text-gray-800 mb-1">Nome do Pet: ${post.petName}</p>` : ''}
                         <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
                     </div>
-                    <div class="p-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
+                    <div class="p-3.5 border-t border-gray-100 flex justify-between items-center bg-[#f9faf6]">
                         <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
-                        <button onclick="startChatWith('${post.userId}', '${post.userName}')" class="bg-brand-500 text-white px-3 py-1 rounded text-xs font-medium hover:bg-brand-600 transition shadow">
-                            <i class="fa-solid fa-comment mr-1"></i> Falar com o Tutor
+                        <button onclick="startChatWith('${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
+                            <i class="fa-solid fa-comment mr-1.5"></i> Falar com o Tutor
                         </button>
                     </div>
                 </div>
@@ -698,22 +780,15 @@
 
         async function handleDeletePost(postId) {
             if (!currentUser) return;
-            
             const confirmed = confirm("Tem certeza que deseja excluir esta publicação?");
             if (!confirmed) return;
 
             try {
-                const { error } = await window.supabase
-                    .from('posts')
-                    .delete()
-                    .eq('id', postId);
-
+                const { error } = await window.supabase.from('posts').delete().eq('id', postId);
                 if (error) throw error;
-
                 showToast("Publicação excluída com sucesso!", "success");
                 renderFeed();
             } catch (err) {
-                console.error("Erro ao excluir publicação:", err);
                 showToast("Erro ao excluir publicação: " + err.message, "error");
             }
         }
@@ -724,7 +799,7 @@
                 return;
             }
             if (!userId || userId === 'undefined') {
-                showToast("Erro: ID do tutor não encontrado neste post.", "error");
+                showToast("Erro: ID do tutor não encontrado.", "error");
                 return;
             }
             if (userId === currentUser.id) {
@@ -745,7 +820,6 @@
 
         async function handlePostSubmit(event) {
             event.preventDefault();
-            
             const submitBtn = event.target.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerText;
             submitBtn.innerText = 'Publicando...';
@@ -785,10 +859,7 @@
             };
 
             try {
-                const { error } = await window.supabase
-                    .from('posts')
-                    .insert([newPost]);
-                
+                const { error } = await window.supabase.from('posts').insert([newPost]);
                 if (error) throw error;
                 
                 closeModal('modal-post');
@@ -798,7 +869,6 @@
                 renderFeed();
                 showToast('Alerta publicado com sucesso!', 'success');
             } catch (err) {
-                console.error("Erro ao salvar alerta no Supabase:", err);
                 const errorMsg = document.getElementById('post-error-msg');
                 errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
                 errorMsg.classList.remove('hidden');
@@ -820,37 +890,34 @@
             const appView = document.getElementById('app-view');
             appView.innerHTML = `
                 <div class="max-w-xl mx-auto space-y-4 text-xs">
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-lime-200">
                         <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
                             <div class="relative group">
-                                <img id="profile-avatar-preview" src="${currentUser.avatar}" class="w-24 h-24 rounded-full object-cover border-4 border-brand-500 shadow-md">
-                                <!-- Gradiente de tratamento na sobreposição de hover da foto de perfil -->
-                                <label for="profile-photo-input" class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                                    <i class="fa-solid fa-camera text-lg drop-shadow"></i>
+                                <img id="profile-avatar-preview" src="${currentUser.avatar}" class="w-24 h-24 rounded-full object-cover border-4 border-lime-500 shadow-md">
+                                <label for="profile-photo-input" class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                                    <i class="fa-solid fa-camera text-lg"></i>
                                 </label>
-                                <!-- Integrado o redimensionador automático com recorte quadrado (400px) -->
                                 <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleImageResize(event, 400, 'profile-edit-avatar', 'profile-avatar-preview')">
                             </div>
                             <div class="text-center sm:text-left">
                                 <h2 class="font-bold text-base text-gray-900">${currentUser.name}</h2>
                                 <p class="text-gray-500">${currentUser.email}</p>
                                 <p class="text-gray-600 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
-                                <p class="text-[11px] text-brand-600 mt-2 font-medium"><i class="fa-solid fa-circle-info mr-1"></i>Clique na sua foto para alterá-la e recortá-la instantaneamente</p>
                             </div>
                         </div>
 
-                        <form onsubmit="handleProfileUpdate(event)" class="space-y-4 border-t pt-4">
+                        <form onsubmit="handleProfileUpdate(event)" class="space-y-3 border-t pt-4">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome Completo</label>
-                                <input type="text" id="profile-edit-name" value="${currentUser.name}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                                <input type="text" id="profile-edit-name" value="${currentUser.name}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Região / Cidade</label>
-                                <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
+                                <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                             </div>
                             <input type="hidden" id="profile-edit-avatar" value="${currentUser.avatar}">
                             <div class="flex justify-end">
-                                <button type="submit" class="bg-brand-500 text-white px-5 py-2 rounded text-xs font-medium hover:bg-brand-600 transition shadow">Salvar Alterações</button>
+                                <button type="submit" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Salvar Alterações</button>
                             </div>
                         </form>
                     </div>
@@ -886,12 +953,12 @@
             
             if (!activeChatRecipient) {
                 appView.innerHTML = `
-                    <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                        <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
-                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-brand-500"></i>Minhas Mensagens (Caixa de Entrada)</h3>
+                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
+                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-lime-700"></i>Mensagens</h3>
                             <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
                         </div>
-                        <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-gray-50 text-xs">
+                        <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs">
                             <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><p>Carregando conversas...</p></div>
                         </div>
                     </div>
@@ -901,11 +968,11 @@
             }
 
             appView.innerHTML = `
-                <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                    <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
+                <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                    <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
-                            <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">
+                            <div class="w-8 h-8 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-xs">
                                 ${activeChatRecipient.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -916,13 +983,13 @@
                         <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
                     </div>
                     
-                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-xs">
+                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-[#f9faf6] text-xs">
                         <div class="text-center text-gray-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Carregando mensagens...</div>
                     </div>
 
                     <div class="p-3 border-t bg-white flex space-x-2">
-                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                        <button onclick="sendChatMessage()" class="bg-brand-500 text-white px-5 py-2 rounded text-xs font-medium hover:bg-brand-600 transition shadow">Enviar</button>
+                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button onclick="sendChatMessage()" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Enviar</button>
                     </div>
                 </div>
             `;
@@ -964,7 +1031,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa encontrada. Vá até o feed e clique em "Falar com o Tutor" em algum alerta.</div>`;
+                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa encontrada. Clique em algum perfil na lateral ou em "Falar com o Tutor" nos alertas.</div>`;
                     return;
                 }
 
@@ -972,9 +1039,7 @@
                 data.forEach(msg => {
                     const isMe = msg.sender_id === currentUser.id;
                     const contactId = isMe ? msg.recipient_id : msg.sender_id;
-                    const contactName = isMe 
-                        ? (msg.recipient_name || 'Usuário') 
-                        : (msg.sender_name || 'Usuário');
+                    const contactName = isMe ? (msg.recipient_name || 'Usuário') : (msg.sender_name || 'Usuário');
 
                     if (!contactsMap.has(contactId)) {
                         contactsMap.set(contactId, {
@@ -989,9 +1054,9 @@
                 const contacts = Array.from(contactsMap.values());
 
                 inboxContainer.innerHTML = contacts.map(contact => `
-                    <div onclick="activeChatRecipient = { id: '${contact.id}', name: '${contact.name}' }; renderChatView();" class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-brand-500 cursor-pointer flex items-center justify-between transition">
+                    <div onclick="activeChatRecipient = { id: '${contact.id}', name: '${contact.name}' }; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
+                            <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
                                 ${contact.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -1004,7 +1069,6 @@
                 `).join('');
 
             } catch (err) {
-                console.error("Erro ao carregar caixa de entrada:", err);
                 inboxContainer.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar lista de conversas.</div>`;
             }
         }
@@ -1028,7 +1092,7 @@
                 );
 
                 if (filteredData.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma conversa iniciada com ${activeChatRecipient.name}. Mande a primeira mensagem!</div>`;
+                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma mensagem trocada ainda com ${activeChatRecipient.name}.</div>`;
                     return;
                 }
 
@@ -1036,7 +1100,7 @@
                     const isMe = msg.sender_id === currentUser.id;
                     return `
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                            <div class="max-w-[75%] px-3 py-2 rounded-lg text-xs ${isMe ? 'bg-brand-500 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'}">
+                            <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-[#365314] text-white rounded-br-none' : 'bg-white border border-lime-200 text-gray-800 rounded-bl-none shadow-sm'}">
                                 ${msg.content}
                             </div>
                             <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -1045,7 +1109,6 @@
                 }).join('');
                 container.scrollTop = container.scrollHeight;
             } catch (err) {
-                console.error("Erro ao carregar mensagens:", err);
                 container.innerHTML = `<div class="text-center text-red-500">Erro ao carregar mensagens.</div>`;
             }
         }
@@ -1055,7 +1118,7 @@
             const content = input?.value.trim();
             if (!content || !activeChatRecipient || !currentUser) return;
 
-            input.value = ínput = '';
+            input.value = '';
 
             try {
                 const { error } = await window.supabase
@@ -1068,14 +1131,9 @@
                         content: content
                     }]);
 
-                if (error) {
-                    console.error("Erro retornado pelo Supabase:", error);
-                    showToast("Erro ao enviar: " + error.message, "error");
-                    return;
-                }
+                if (error) throw error;
                 loadMessages();
             } catch (err) {
-                console.error("Erro ao enviar mensagem:", err);
                 showToast("Erro ao enviar mensagem.", "error");
             }
         }
