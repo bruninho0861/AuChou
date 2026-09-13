@@ -621,7 +621,7 @@
                         <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
                     </div>
                     <div class="p-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-                        <span class="text-[10px] text-gray-500"><i class="fa-solid fa-clock mr-1"></i>${post.location}</span>
+                        <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
                         <button onclick="startChatWith('${post.userId}', '${post.userName}')" class="bg-brand-500 text-white px-3 py-1 rounded text-xs font-medium hover:bg-brand-600 transition shadow">
                             <i class="fa-solid fa-comment mr-1"></i> Falar com o Tutor
                         </button>
@@ -753,26 +753,111 @@
             `;
         }
 
-        function renderChatView() {
+        async function renderChatView() {
+            if (!currentUser) { openAuthModal('login'); return; }
             const appView = document.getElementById('app-view');
-            const recipientText = activeChatRecipient ? `Conversando com: <strong>${activeChatRecipient.name}</strong>` : 'Selecione um tutor para iniciar a conversa sobre o pet.';
             
+            if (!activeChatRecipient) {
+                appView.innerHTML = `
+                    <div class="bg-white p-8 rounded shadow-sm border border-gray-200 max-w-md mx-auto text-center text-xs space-y-3">
+                        <i class="fa-solid fa-comments text-4xl text-brand-500"></i>
+                        <h3 class="font-bold text-gray-900 text-sm">Nenhuma conversa selecionada</h3>
+                        <p class="text-gray-500">Vá até o feed e clique em <strong>"Falar com o Tutor"</strong> em algum alerta para iniciar um chat sobre o pet.</p>
+                        <button onclick="switchTab('feed')" class="bg-brand-500 text-white px-4 py-2 rounded font-medium hover:bg-brand-600 transition shadow">Ir para o Feed</button>
+                    </div>
+                `;
+                return;
+            }
+
             appView.innerHTML = `
-                <div class="bg-white p-6 rounded shadow-sm border border-gray-200 max-w-2xl mx-auto space-y-4">
-                    <div class="border-b pb-3 flex items-center justify-between">
-                        <h3 class="font-bold text-sm text-gray-900"><i class="fa-solid fa-comments mr-2 text-brand-500"></i>Painel de Mensagens</h3>
-                        <span class="text-[11px] text-gray-500">${recipientText}</span>
+                <div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl mx-auto flex flex-col h-[500px]">
+                    <div class="p-4 border-b bg-gray-50 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">
+                                ${activeChatRecipient.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-xs">${activeChatRecipient.name}</h3>
+                                <p class="text-[10px] text-emerald-600 font-medium">Chat ativo</p>
+                            </div>
+                        </div>
+                        <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
                     </div>
-                    <div class="bg-gray-50 h-64 rounded p-4 overflow-y-auto flex flex-col justify-center items-center text-gray-400 text-xs">
-                        <i class="fa-regular fa-comment-dots text-3xl mb-2 text-gray-300"></i>
-                        <p>As mensagens trocadas com os tutores aparecerão aqui.</p>
+                    
+                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-xs">
+                        <div class="text-center text-gray-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Carregando mensagens...</div>
                     </div>
-                    <div class="flex space-x-2">
-                        <input type="text" placeholder="Digite sua mensagem sobre o paradeiro do pet..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500">
-                        <button onclick="showToast('Funcionalidade de envio rápido pronta para expansão!', 'success')" class="bg-brand-500 text-white px-4 py-2 rounded text-xs font-medium hover:bg-brand-600 shadow">Enviar</button>
+
+                    <div class="p-3 border-t bg-white flex space-x-2">
+                        <input type="text" id="chat-input-text" placeholder="Escreva onde viu o pet..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-brand-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button onclick="sendChatMessage()" class="bg-brand-500 text-white px-5 py-2 rounded text-xs font-medium hover:bg-brand-600 transition shadow">Enviar</button>
                     </div>
                 </div>
             `;
+
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!activeChatRecipient || !currentUser) return;
+            const container = document.getElementById('chat-messages-container');
+            if (!container) return;
+
+            try {
+                const { data, error } = await window.supabase
+                    .from('messages')
+                    .select('*')
+                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatRecipient.id}),and(sender_id.eq.${activeChatRecipient.id},recipient_id.eq.${currentUser.id})`)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma mensagem ainda. Envie a primeira para ajudar o tutor!</div>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(msg => {
+                    const isMe = msg.sender_id === currentUser.id;
+                    return `
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                            <div class="max-w-[75%] px-3 py-2 rounded-lg text-xs ${isMe ? 'bg-brand-500 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'}">
+                                ${msg.content}
+                            </div>
+                            <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    `;
+                }).join('');
+                container.scrollTop = container.scrollHeight;
+            } catch (err) {
+                console.error("Erro ao carregar mensagens:", err);
+                container.innerHTML = `<div class="text-center text-red-500">Erro ao carregar mensagens do chat.</div>`;
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input-text');
+            const content = input?.value.trim();
+            if (!content || !activeChatRecipient || !currentUser) return;
+
+            input.value = '';
+
+            try {
+                const { error } = await window.supabase
+                    .from('messages')
+                    .insert([{
+                        sender_id: currentUser.id,
+                        sender_name: currentUser.name,
+                        recipient_id: activeChatRecipient.id,
+                        content: content
+                    }]);
+
+                if (error) throw error;
+                loadMessages();
+            } catch (err) {
+                console.error("Erro ao enviar mensagem:", err);
+                showToast("Erro ao enviar mensagem.", "error");
+            }
         }
     </script>
 </body>
