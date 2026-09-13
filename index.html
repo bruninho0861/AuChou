@@ -390,28 +390,31 @@
 
             notificationInterval = setInterval(() => {
                 checkNewMessagesCount(false);
-            }, 4000);
+            }, 3000);
         }
 
         async function checkNewMessagesCount(isInitial = false) {
             if (!currentUser) return;
             try {
+                // Consulta direta e segura baseada no ID do usuário logado
                 const { data, error } = await window.supabase
                     .from('messages')
-                    .select('id, recipient_id')
-                    .eq('recipient_id', currentUser.id);
+                    .select('id, recipient_id, sender_id, content')
+                    .or(`recipient_id.eq.${currentUser.id},sender_id.eq.${currentUser.id}`);
 
                 if (error) return;
 
-                const totalMessages = data ? data.length : 0;
+                // Filtra apenas as mensagens recebidas por mim de outros usuários
+                const receivedMessages = (data || []).filter(msg => msg.recipient_id === currentUser.id);
+                const totalReceived = receivedMessages.length;
 
                 if (isInitial) {
-                    lastKnownMessageCount = totalMessages;
-                } else if (totalMessages > lastKnownMessageCount) {
-                    // Dispara a bolinha piscando e o pop-up de notificação flutuante na tela!
+                    lastKnownMessageCount = totalReceived;
+                } else if (totalReceived > lastKnownMessageCount) {
+                    // Dispara a bolinha e a notificação flutuante na tela!
                     triggerChatNotificationPulse();
-                    showToast("💬 Você recebeu uma nova mensagem!", "success");
-                    lastKnownMessageCount = totalMessages;
+                    showToast("💬 Nova mensagem recebida!", "success");
+                    lastKnownMessageCount = totalReceived;
                 }
             } catch (err) {
                 console.error("Erro ao checar mensagens:", err);
