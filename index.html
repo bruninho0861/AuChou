@@ -98,12 +98,12 @@
         <!-- Visitor Banner if not logged in -->
         <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-lime-200 flex flex-col md:flex-row items-center justify-between">
             <div class="mb-4 md:mb-0">
-                <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets![cite: 3]</h2>
-                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores e publicar alertas de resgate[cite: 3].</p>
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets!</h2>
+                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores e publicar alertas de resgate.</p>
             </div>
             <div class="flex space-x-3">
-                <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar[cite: 3]</button>
-                <button onclick="openAuthModal('register')" class="bg-gray-100 text-gray-800 px-5 py-2 rounded-lg font-medium text-xs border border-gray-300 hover:bg-gray-200 transition">Cadastre-se[cite: 3]</button>
+                <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar</button>
+                <button onclick="openAuthModal('register')" class="bg-gray-100 text-gray-800 px-5 py-2 rounded-lg font-medium text-xs border border-gray-300 hover:bg-gray-200 transition">Cadastre-se</button>
             </div>
         </div>
 
@@ -114,10 +114,10 @@
 
     <footer class="bg-white border-t border-gray-200 mt-12 py-4 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados[cite: 3].</p>
+            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados.</p>
             <div class="flex space-x-4">
-                <a href="#" onclick="showAboutModal(); return false;" class="text-lime-700 hover:underline">Sobre o Projeto[cite: 3]</a>
-                <a href="#" onclick="showPrivacyModal(); return false;" class="text-lime-700 hover:underline">Privacidade[cite: 3]</a>
+                <a href="#" onclick="showAboutModal(); return false;" class="text-lime-700 hover:underline">Sobre o Projeto</a>
+                <a href="#" onclick="showPrivacyModal(); return false;" class="text-lime-700 hover:underline">Privacidade</a>
             </div>
         </div>
     </footer>
@@ -133,7 +133,7 @@
                     <i class="fa-solid fa-paw"></i>
                 </div>
                 <h3 id="auth-modal-title" class="text-lg font-bold text-gray-900">Entrar no AuChou</h3>
-                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Conecte-se com sua rede de tutores e pets[cite: 3]</p>
+                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Conecte-se com sua rede de tutores e pets</p>
             </div>
 
             <form id="auth-form" onsubmit="handleAuthSubmit(event)">
@@ -148,20 +148,20 @@
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Senha</label>
                     <input type="password" id="auth-password" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="••••••••">
-                    <p id="password-hint" class="text-[11px] text-gray-500 mt-1 hidden">Mínimo 8 caracteres, 1 letra maiúscula e 1 caractere especial (!@#$%...).[cite: 3]</p>
+                    <p id="password-hint" class="text-[11px] text-gray-500 mt-1 hidden">Mínimo 8 caracteres, 1 letra maiúscula e 1 caractere especial (!@#$%...).</p>
                 </div>
                 
                 <div id="auth-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
 
-                <button type="submit" id="auth-submit-btn" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Entrar[cite: 3]</button>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Entrar</button>
             </form>
 
             <div class="mt-4 text-center">
                 <p id="auth-switch-text" class="text-xs text-gray-600">
-                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se[cite: 3]</a>
+                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>
                 </p>
                 <p id="forgot-password-link-wrap" class="text-xs text-gray-600 mt-2">
-                    <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-gray-500 hover:text-lime-700 hover:underline">Esqueceu sua senha?[cite: 3]</a>
+                    <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-gray-500 hover:text-lime-700 hover:underline">Esqueceu sua senha?</a>
                 </p>
             </div>
         </div>
@@ -178,7 +178,7 @@
                     <i class="fa-solid fa-key"></i>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900">Recuperação de Senha</h3>
-                <p class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado[cite: 3]</p>
+                <p class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado</p>
             </div>
 
             <form id="forgot-step1-form" onsubmit="handleSupabasePasswordReset(event)">
@@ -187,11 +187,11 @@
                     <input type="email" id="forgot-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="seu@email.com">
                 </div>
                 <div id="forgot-error-msg-1" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
-                <button type="submit" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Enviar Link de Recuperação[cite: 3]</button>
+                <button type="submit" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Enviar Link de Recuperação</button>
             </form>
 
             <div class="mt-4 text-center">
-                <a href="#" onclick="backToLoginFromForgot(); return false;" class="text-xs text-lime-700 font-semibold hover:underline">Voltar para o login[cite: 3]</a>
+                <a href="#" onclick="backToLoginFromForgot(); return false;" class="text-xs text-lime-700 font-semibold hover:underline">Voltar para o login</a>
             </div>
         </div>
     </div>
@@ -202,7 +202,7 @@
             <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900 mb-4">Criar Alerta de Pet[cite: 3]</h3>
+            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900 mb-4">Criar Alerta de Pet</h3>
 
             <form id="post-form" onsubmit="handlePostSubmit(event)">
                 <input type="hidden" id="post-edit-id">
@@ -210,12 +210,12 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Categoria / Tipo de Alerta</label>
                         <select id="post-category" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Cão Perdido">Cão Perdido[cite: 3]</option>
-                            <option value="Cão Achado">Cão Achado[cite: 3]</option>
-                            <option value="Gato Perdido">Gato Perdido[cite: 3]</option>
-                            <option value="Gato Achado">Gato Achado[cite: 3]</option>
-                            <option value="Outros Pets - Perdido">Outros Pets - Perdido[cite: 3]</option>
-                            <option value="Outros Pets - Achado">Outros Pets - Achado[cite: 3]</option>
+                            <option value="Cão Perdido">Cão Perdido</option>
+                            <option value="Cão Achado">Cão Achado</option>
+                            <option value="Gato Perdido">Gato Perdido</option>
+                            <option value="Gato Achado">Gato Achado</option>
+                            <option value="Outros Pets - Perdido">Outros Pets - Perdido</option>
+                            <option value="Outros Pets - Achado">Outros Pets - Achado</option>
                         </select>
                     </div>
                     <div>
@@ -228,9 +228,9 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Espécie</label>
                         <select id="post-species" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Cão">Cão[cite: 3]</option>
-                            <option value="Gato">Gato[cite: 3]</option>
-                            <option value="Outro">Outro[cite: 3]</option>
+                            <option value="Cão">Cão</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Outro">Outro</option>
                         </select>
                     </div>
                     <div>
@@ -240,9 +240,9 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Porte</label>
                         <select id="post-size" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Pequeno">Pequeno[cite: 3]</option>
-                            <option value="Médio">Médio[cite: 3]</option>
-                            <option value="Grande">Grande[cite: 3]</option>
+                            <option value="Pequeno">Pequeno</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Grande">Grande</option>
                         </select>
                     </div>
                 </div>
@@ -261,10 +261,10 @@
                 <!-- Mapa Interativo Integrado -->
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-lime-800 uppercase mb-1">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Arraste o marcador ou clique no mapa para indicar onde o pet foi visto[cite: 3]:
+                        <i class="fa-solid fa-map-location-dot mr-1"></i> Arraste o marcador ou clique no mapa para indicar onde o pet foi visto:
                     </label>
                     <div id="map"></div>
-                    <p class="text-[10px] text-gray-500 mt-1">O campo de localização acima será preenchido automaticamente ao selecionar um ponto no mapa[cite: 3].</p>
+                    <p class="text-[10px] text-gray-500 mt-1">O campo de localização acima será preenchido automaticamente ao selecionar um ponto no mapa.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -275,8 +275,8 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Status</label>
                         <select id="post-status" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Procurando">Procurando / Ativo[cite: 3]</option>
-                            <option value="Reunido">Reunido com a Família / Solucionado[cite: 3]</option>
+                            <option value="Procurando">Procurando / Ativo</option>
+                            <option value="Reunido">Reunido com a Família / Solucionado</option>
                         </select>
                     </div>
                 </div>
@@ -295,8 +295,8 @@
                 <div id="post-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
 
                 <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal('modal-post')" class="px-4 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 transition">Cancelar[cite: 3]</button>
-                    <button type="submit" class="px-5 py-2 bg-[#365314] text-white font-medium rounded text-xs hover:bg-lime-900 transition shadow">Publicar Alerta[cite: 3]</button>
+                    <button type="button" onclick="closeModal('modal-post')" class="px-4 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-[#365314] text-white font-medium rounded text-xs hover:bg-lime-900 transition shadow">Publicar Alerta</button>
                 </div>
             </form>
         </div>
@@ -325,7 +325,6 @@
         let allRegisteredUsers = [];
         let postMap = null;
         let postMarker = null;
-        let unreadMessagesCount = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const checkSupabaseReady = setInterval(async () => {
@@ -336,7 +335,6 @@
                     if (session) {
                         await fetchUserProfile(session.user);
                         setupGlobalChatListener();
-                        checkForUnreadMessages();
                     }
                     await fetchAllUsers();
                     updateNavigationUI();
@@ -382,7 +380,7 @@
             }
         }
 
-        // Listener global de mensagens para piscar o ícone de conversas em tempo real
+        // Listener global de mensagens em tempo real robusto
         function setupGlobalChatListener() {
             if (!currentUser) return;
             if (window.globalChatSub) {
@@ -390,35 +388,18 @@
             }
 
             window.globalChatSub = window.supabase
-                .channel('global-chat-notifications')
+                .channel('public:messages:global')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
                     const msg = payload.new;
-                    // Se a mensagem for destinada a mim e eu não estiver com o chat aberto com esse remetente
-                    if (msg.recipient_id === currentUser.id) {
+                    // Se a mensagem foi enviada para mim por outra pessoa
+                    if (msg.recipient_id === currentUser.id && msg.sender_id !== currentUser.id) {
+                        // Se eu não estou com o chat aberto com essa pessoa específica
                         if (!activeChatRecipient || activeChatRecipient.id !== msg.sender_id) {
                             triggerChatNotificationPulse();
                         }
                     }
                 })
                 .subscribe();
-        }
-
-        async function checkForUnreadMessages() {
-            if (!currentUser) return;
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('*')
-                    .eq('recipient_id', currentUser.id);
-
-                if (error) throw error;
-                if (data && data.length > 0) {
-                    // Se houver mensagens recebidas, exibe o indicador pulsante no ícone
-                    triggerChatNotificationPulse();
-                }
-            } catch (err) {
-                console.error("Erro ao verificar mensagens não lidas:", err);
-            }
         }
 
         function triggerChatNotificationPulse() {
@@ -572,18 +553,18 @@
             if (mode === 'register') {
                 isRegisterMode = true;
                 titleEl.innerText = 'Criar Conta no AuChou';
-                subtitleEl.innerText = 'Cadastre-se para interagir na rede[cite: 3]';
+                subtitleEl.innerText = 'Cadastre-se para interagir na rede';
                 nameField.classList.remove('hidden');
-                submitBtn.innerText = 'Cadastrar[cite: 3]';
-                switchText.innerHTML = `Já tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Entrar[cite: 3]</a>`;
+                submitBtn.innerText = 'Cadastrar';
+                switchText.innerHTML = `Já tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Entrar</a>`;
                 passwordHint.classList.remove('hidden');
             } else {
                 isRegisterMode = false;
                 titleEl.innerText = 'Entrar no AuChou';
-                subtitleEl.innerText = 'Conecte-se para ajudar animais perdidos[cite: 3]';
+                subtitleEl.innerText = 'Conecte-se para ajudar animais perdidos';
                 nameField.classList.add('hidden');
-                submitBtn.innerText = 'Entrar[cite: 3]';
-                switchText.innerHTML = `Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se[cite: 3]</a>`;
+                submitBtn.innerText = 'Entrar';
+                switchText.innerHTML = `Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>`;
                 passwordHint.classList.add('hidden');
             }
 
@@ -672,7 +653,6 @@
                     await fetchUserProfile(data.user);
                     await fetchAllUsers();
                     setupGlobalChatListener();
-                    checkForUnreadMessages();
                     closeModal('modal-auth');
                     updateNavigationUI();
                     renderFeed();
@@ -782,7 +762,7 @@
                                 <p><a href="#" onclick="switchTab('profile'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-user mr-2 w-4 text-center"></i> meu perfil</a></p>
                                 <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens</a></p>
                                 <p><a href="#" onclick="openPostModal(); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-bullhorn mr-2 w-4 text-center"></i> criar alerta</a></p>
-                                ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar[cite: 3]</a></p>`}
+                                ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar</a></p>`}
                             </div>
                         </div>
 
