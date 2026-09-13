@@ -50,13 +50,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         #map { height: 180px; width: 100%; border-radius: 0.5rem; z-index: 10; }
-        @keyframes pulse-fast {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.15); }
-        }
-        .animate-pulse-icon {
-            animation: pulse-fast 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -75,10 +68,7 @@
             <div class="hidden md:flex items-center space-x-1 text-xs font-semibold">
                 <button onclick="switchTab('feed')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Início</button>
                 <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
-                <button onclick="switchTab('chats')" id="nav-chat-btn" class="px-3 py-1.5 hover:bg-white/10 rounded transition relative flex items-center space-x-1.5">
-                    <span>Mensagens</span>
-                    <span id="chat-notification-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
-                </button>
+                <button onclick="switchTab('chats')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Mensagens</button>
                 <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
             </div>
 
@@ -325,8 +315,6 @@
         let allRegisteredUsers = [];
         let postMap = null;
         let postMarker = null;
-        let lastKnownMessageCount = 0;
-        let notificationInterval = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const checkSupabaseReady = setInterval(async () => {
@@ -336,7 +324,6 @@
                     const { data: { session } } = await window.supabase.auth.getSession();
                     if (session) {
                         await fetchUserProfile(session.user);
-                        startMessagePolling();
                     }
                     await fetchAllUsers();
                     updateNavigationUI();
@@ -382,59 +369,9 @@
             }
         }
 
-        // Sistema seguro de Verificação Automática (Polling) para notificação
-        function startMessagePolling() {
-            if (!currentUser) return;
-            if (notificationInterval) clearInterval(notificationInterval);
-
-            checkNewMessagesCount(true);
-
-            notificationInterval = setInterval(() => {
-                checkNewMessagesCount(false);
-            }, 4000);
-        }
-
-        async function checkNewMessagesCount(isInitial = false) {
-            if (!currentUser) return;
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('id, recipient_id')
-                    .eq('recipient_id', currentUser.id);
-
-                if (error) return;
-
-                const totalMessages = data ? data.length : 0;
-
-                if (isInitial) {
-                    lastKnownMessageCount = totalMessages;
-                } else if (totalMessages > lastKnownMessageCount) {
-                    triggerChatNotificationPulse();
-                    showToast("💬 Você recebeu uma nova mensagem!", "success");
-                    lastKnownMessageCount = totalMessages;
-                }
-            } catch (err) {
-                console.error("Erro ao checar mensagens:", err);
-            }
-        }
-
-        function triggerChatNotificationPulse() {
-            const dot = document.getElementById('chat-notification-dot');
-            if (dot) {
-                dot.classList.remove('hidden');
-            }
-        }
-
-        function clearChatNotificationPulse() {
-            const dot = document.getElementById('chat-notification-dot');
-            if (dot) {
-                dot.classList.add('hidden');
-            }
-        }
-
         function initPostMap() {
-            const defaultLat = -23.5866; 
-            const defaultLng = -48.0531; 
+            const defaultLat = -23.5866; // Itapetininga - SP latitude aproximada
+            const defaultLng = -48.0531; // Itapetininga - SP longitude aproximada
 
             setTimeout(() => {
                 if (!postMap) {
@@ -668,7 +605,6 @@
                 } else {
                     await fetchUserProfile(data.user);
                     await fetchAllUsers();
-                    startMessagePolling();
                     closeModal('modal-auth');
                     updateNavigationUI();
                     renderFeed();
@@ -678,7 +614,6 @@
         }
 
         async function handleLogout() {
-            if (notificationInterval) clearInterval(notificationInterval);
             await window.supabase.auth.signOut();
             currentUser = null;
             isAdminLoggedIn = false;
@@ -694,14 +629,14 @@
             const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-[#365314]' };
             const toast = document.createElement('div');
             toast.id = 'auchou-toast';
-            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success} transition-all duration-300 transform translate-y-0`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-sm"></i><span>${message}</span>`;
+            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-2 rounded shadow-xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i><span>${message}</span>`;
             document.body.appendChild(toast);
 
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 400);
-            }, 4000);
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
 
         async function renderFeed() {
@@ -804,7 +739,7 @@
                         </div>
                     </div>
 
-                    <!-- Coluna Direita: Perfis de Usuários -->
+                    <!-- Coluna Direita: Perfis de Usuários (Clicáveis para interagir!) -->
                     <div class="md:col-span-1 space-y-4">
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200">
                             <div class="flex items-center justify-between mb-3 border-b pb-1.5">
@@ -812,6 +747,7 @@
                                 <span class="text-[10px] text-lime-700 cursor-pointer font-medium" onclick="showToast('Exibindo todos os membros cadastrados', 'info')">ver todos</span>
                             </div>
 
+                            <!-- Grade de Fotos Estilo Grade com Interação ao Clicar -->
                             <div class="grid grid-cols-3 gap-2.5">
                                 ${sidebarUsers.length === 0 ? `
                                     <div class="col-span-3 text-center text-gray-400 py-6 text-[11px]">Nenhum membro cadastrado ainda.</div>
@@ -1011,10 +947,7 @@
             currentActiveTab = tab;
             if (tab === 'feed') renderFeed();
             else if (tab === 'profile') renderProfileView();
-            else if (tab === 'chats') {
-                clearChatNotificationPulse();
-                renderChatView();
-            }
+            else if (tab === 'chats') renderChatView();
         }
 
         function renderProfileView() {
@@ -1081,7 +1014,6 @@
 
         async function renderChatView() {
             if (!currentUser) { openAuthModal('login'); return; }
-            clearChatNotificationPulse();
             const appView = document.getElementById('app-view');
             
             if (!activeChatRecipient) {
@@ -1110,7 +1042,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 text-xs">${activeChatRecipient.name}</h3>
-                                <p class="text-[10px] text-emerald-600 font-medium">Chat ativo</p>
+                                <p class="text-[10px] text-emerald-600 font-medium">Chat em tempo real ativo</p>
                             </div>
                         </div>
                         <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
@@ -1128,6 +1060,25 @@
             `;
 
             loadMessages();
+
+            if (window.chatSubscription) {
+                window.supabase.removeChannel(window.chatSubscription);
+            }
+            
+            window.chatSubscription = window.supabase
+                .channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    if (activeChatRecipient && currentUser) {
+                        const msg = payload.new;
+                        if (
+                            (msg.sender_id === currentUser.id && msg.recipient_id === activeChatRecipient.id) ||
+                            (msg.sender_id === activeChatRecipient.id && msg.recipient_id === currentUser.id)
+                        ) {
+                            loadMessages();
+                        }
+                    }
+                })
+                .subscribe();
         }
 
         async function loadInboxConversations() {
@@ -1228,30 +1179,29 @@
         }
 
         async function sendChatMessage() {
-    const input = document.getElementById('chat-input-text');
-    const content = input?.value.trim();
-    if (!content || !activeChatRecipient || !currentUser) return;
+            const input = document.getElementById('chat-input-text');
+            const content = input?.value.trim();
+            if (!content || !activeChatRecipient || !currentUser) return;
 
-    input.value = '';
+            input.value = '';
 
-    try {
-        const { error } = await window.supabase
-            .from('messages')
-            .insert([{
-                sender_id: currentUser.id,
-                sender_name: currentUser.name,
-                recipient_id: activeChatRecipient.id,
-                recipient_name: activeChatRecipient.name,
-                content: content
-            }]);
+            try {
+                const { error } = await window.supabase
+                    .from('messages')
+                    .insert([{
+                        sender_id: currentUser.id,
+                        sender_name: currentUser.name,
+                        recipient_id: activeChatRecipient.id,
+                        recipient_name: activeChatRecipient.name,
+                        content: content
+                    }]);
 
-        if (error) throw error;
-        loadMessages();
-    } catch (err) {
-        console.error("Erro ao enviar mensagem:", err);
-        showToast("Erro ao enviar mensagem.", "error");
-    }
-}
+                if (error) throw error;
+                loadMessages();
+            } catch (err) {
+                showToast("Erro ao enviar mensagem.", "error");
+            }
+        }
     </script>
 </body>
 </html>
