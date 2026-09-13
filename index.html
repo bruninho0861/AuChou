@@ -289,9 +289,7 @@
         let activeChatRecipient = null;
         let isRegisterMode = false;
 
-        // Inicialização limpa e assíncrona da sessão e do feed
         document.addEventListener('DOMContentLoaded', async () => {
-            // Pequeno loop para garantir que o SDK do Supabase carregou do módulo
             const checkSupabaseReady = setInterval(async () => {
                 if (window.supabase) {
                     clearInterval(checkSupabaseReady);
