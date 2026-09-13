@@ -289,10 +289,13 @@
         let activeChatRecipient = null;
         let isRegisterMode = false;
 
-        // Sincroniza a sessão do Supabase ao carregar a página
+        // Inicialização limpa e assíncrona da sessão e do feed
         document.addEventListener('DOMContentLoaded', async () => {
-            setTimeout(async () => {
+            // Pequeno loop para garantir que o SDK do Supabase carregou do módulo
+            const checkSupabaseReady = setInterval(async () => {
                 if (window.supabase) {
+                    clearInterval(checkSupabaseReady);
+                    
                     const { data: { session } } = await window.supabase.auth.getSession();
                     if (session) {
                         currentUser = {
@@ -305,10 +308,10 @@
                         };
                         if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
                     }
+                    updateNavigationUI();
+                    renderFeed();
                 }
-                updateNavigationUI();
-                renderFeed(); // Inicia a busca no banco de dados aqui
-            }, 500);
+            }, 100);
         });
 
         function updateNavigationUI() {
@@ -497,12 +500,10 @@
             }, 3500);
         }
 
-        // Função transformada em Async para buscar no Supabase
         async function renderFeed(filter = {}) {
             currentActiveTab = 'feed';
             const appView = document.getElementById('app-view');
             
-            // Exibir estado de carregamento enquanto busca do banco
             appView.innerHTML = `
                 <div class="flex flex-col justify-center items-center py-20">
                     <i class="fa-solid fa-spinner fa-spin text-brand-500 text-4xl mb-3"></i>
@@ -512,7 +513,6 @@
 
             let posts = [];
             try {
-                // Buscando a tabela 'posts' no Supabase
                 const { data, error } = await window.supabase
                     .from('posts')
                     .select('*')
@@ -525,7 +525,6 @@
                 showToast("Falha na conexão com o banco de dados.", "error");
             }
 
-            // Normalizando os dados (suporta snake_case e camelCase)
             const normalizedPosts = posts.map(p => ({
                 id: p.id,
                 userId: p.user_id || p.userId,
@@ -646,11 +645,9 @@
             modal.classList.remove('hidden');
         }
 
-        // Função transformada em Async para salvar no Supabase
         async function handlePostSubmit(event) {
             event.preventDefault();
             
-            // Alterar o botão para estado de "salvando" para evitar duplo clique
             const submitBtn = event.target.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerText;
             submitBtn.innerText = 'Publicando...';
@@ -671,7 +668,6 @@
                 photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600';
             }
 
-            // Objeto a ser enviado para a tabela 'posts' no Supabase
             const newPost = {
                 user_id: currentUser.id,
                 user_name: currentUser.name,
@@ -691,19 +687,16 @@
             };
 
             try {
-                // Inserir os dados na tabela do banco
                 const { error } = await window.supabase
                     .from('posts')
                     .insert([newPost]);
                 
                 if (error) throw error;
                 
-                // Limpar campos e fechar o modal
                 closeModal('modal-post');
                 document.getElementById('post-form').reset();
                 document.getElementById('post-photo-url').value = '';
                 
-                // Recarregar os dados renderizando o feed do banco
                 renderFeed();
                 showToast('Alerta publicado com sucesso!', 'success');
             } catch (err) {
@@ -712,7 +705,6 @@
                 errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
                 errorMsg.classList.remove('hidden');
             } finally {
-                // Restaurar botão
                 submitBtn.innerText = originalBtnText;
                 submitBtn.disabled = false;
             }
