@@ -80,7 +80,7 @@
                 <button onclick="switchTab('feed')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Início</button>
                 <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
                 <button onclick="switchTab('chats')" id="nav-chat-btn" class="px-3 py-1.5 hover:bg-white/10 rounded transition relative flex items-center space-x-1.5">
-                    <span>Mensagens</span>
+                    <span>Mensagens por Post</span>
                     <span id="chat-notification-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
                 </button>
                 <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
@@ -103,7 +103,7 @@
         <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-lime-200 flex flex-col md:flex-row items-center justify-between">
             <div class="mb-4 md:mb-0">
                 <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets!</h2>
-                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores e publicar alertas de resgate.</p>
+                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores nos posts de resgate.</p>
             </div>
             <div class="flex space-x-3">
                 <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar</button>
@@ -118,7 +118,7 @@
 
     <footer class="bg-white border-t border-gray-200 mt-12 py-4 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados.</p>
+            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados. Conversas 100% isoladas por post.</p>
             <div class="flex space-x-4">
                 <a href="#" onclick="showAboutModal(); return false;" class="text-lime-700 hover:underline">Sobre o Projeto</a>
                 <a href="#" onclick="showPrivacyModal(); return false;" class="text-lime-700 hover:underline">Privacidade</a>
@@ -324,7 +324,7 @@
         let currentUser = null;
         let isAdminLoggedIn = false;
         let currentActiveTab = 'feed';
-        let activeChatRecipient = null;
+        let activeChatSession = null; // { postId, postTitle, postOwnerId, postOwnerName, participantId, participantName }
         let isRegisterMode = false;
         let allRegisteredUsers = [];
         let postMap = null;
@@ -413,11 +413,11 @@
                     lastKnownMessageCount = totalMessages;
                 } else if (totalMessages > lastKnownMessageCount) {
                     triggerChatNotificationPulse();
-                    showToast("💬 Você recebeu uma nova mensagem!", "success");
+                    showToast("💬 Você recebeu uma nova mensagem num post!", "success");
                     lastKnownMessageCount = totalMessages;
                     
                     if (currentActiveTab === 'chats') {
-                        if (activeChatRecipient) {
+                        if (activeChatSession) {
                             loadMessages();
                         } else {
                             loadInboxConversations();
@@ -788,7 +788,7 @@
                             
                             <div class="text-left text-[11px] space-y-2 border-t border-gray-100 pt-3 text-gray-700 font-medium">
                                 <p><a href="#" onclick="switchTab('profile'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-user mr-2 w-4 text-center"></i> meu perfil</a></p>
-                                <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens</a></p>
+                                <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens por post</a></p>
                                 <p><a href="#" onclick="openPostModal(); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-bullhorn mr-2 w-4 text-center"></i> criar alerta</a></p>
                                 ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar</a></p>`}
                             </div>
@@ -838,8 +838,8 @@
                         </div>
 
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-xs">
-                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Recados (0)</h4>
-                            <p class="text-[11px] text-gray-500 italic">Nenhum recado pendente.</p>
+                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Dica AuChou</h4>
+                            <p class="text-[11px] text-gray-500">Cada conversa fica isolada exclusivamente no post do animal correspondente!</p>
                         </div>
                     </div>
 
@@ -857,8 +857,8 @@
                 <p class="text-xs text-gray-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${userRegion}</p>
                 <p class="text-xs text-gray-600 mb-4 bg-lime-50 p-2.5 rounded border border-lime-100">Membro da rede AuChou Pets dedicado a auxiliar na localização e resgate de animais.</p>
                 <div class="flex space-x-2">
-                    <button onclick="closeModal('modal-view-profile'); startChatWith('${userId}', '${userName}');" class="flex-1 bg-[#365314] text-white py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">
-                        <i class="fa-solid fa-comment mr-1"></i> Enviar Mensagem
+                    <button onclick="closeModal('modal-view-profile'); switchTab('feed');" class="flex-1 bg-[#365314] text-white py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">
+                        <i class="fa-solid fa-paw mr-1"></i> Ver Alertas do Tutor
                     </button>
                     <button onclick="closeModal('modal-view-profile')" class="px-3 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50">Fechar</button>
                 </div>
@@ -882,6 +882,8 @@
                     </button>
                 `;
             }
+
+            const postTitleText = post.petName ? `${post.category}: ${post.petName} (${post.breed})` : `${post.category} - ${post.breed}`;
 
             return `
                 <div class="bg-white rounded-xl shadow-sm border border-lime-200 overflow-hidden text-xs">
@@ -909,8 +911,8 @@
                     </div>
                     <div class="p-3.5 border-t border-gray-100 flex justify-between items-center bg-[#f9faf6]">
                         <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
-                        <button onclick="startChatWith('${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
-                            <i class="fa-solid fa-comment mr-1.5"></i> Falar com o Tutor
+                        <button onclick="openChatForPost('${post.id}', '${postTitleText.replace(/'/g, "\\'")}', '${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
+                            <i class="fa-solid fa-comment mr-1.5"></i> ${isOwner ? 'Ver Conversas Deste Post' : 'Conversar Sobre Este Post'}
                         </button>
                     </div>
                 </div>
@@ -919,7 +921,7 @@
 
         async function handleDeletePost(postId) {
             if (!currentUser) return;
-            const confirmed = confirm("Tem certeza que deseja excluir esta publicação?");
+            const confirmed = confirm("Tem certeza que deseja excluir esta publicação e suas conversas associadas?");
             if (!confirmed) return;
 
             try {
@@ -932,20 +934,30 @@
             }
         }
 
-        function startChatWith(userId, userName) {
+        function openChatForPost(postId, postTitle, postOwnerId, postOwnerName) {
             if (!currentUser) {
                 openAuthModal('login');
                 return;
             }
-            if (!userId || userId === 'undefined') {
-                showToast("Erro: ID do tutor não encontrado.", "error");
+            if (!postId) {
+                showToast("Erro: ID da publicação não encontrado.", "error");
                 return;
             }
-            if (userId === currentUser.id) {
-                showToast("Você não pode enviar mensagem para si mesmo.", "error");
-                return;
-            }
-            activeChatRecipient = { id: userId, name: userName || 'Tutor' };
+
+            // Se o usuário logado é o dono do post, definimos participantId como null inicialmente para ele ver quem comentou
+            // Se o usuário logado NÃO é o dono do post, ele conversa diretamente com o dono (postOwnerId)
+            const participantId = (currentUser.id === postOwnerId) ? null : postOwnerId;
+            const participantName = (currentUser.id === postOwnerId) ? null : postOwnerName;
+
+            activeChatSession = {
+                postId: postId,
+                postTitle: postTitle,
+                postOwnerId: postOwnerId,
+                postOwnerName: postOwnerName,
+                participantId: participantId,
+                participantName: participantName
+            };
+
             switchTab('chats');
         }
 
@@ -1095,15 +1107,16 @@
             clearChatNotificationPulse();
             const appView = document.getElementById('app-view');
             
-            if (!activeChatRecipient) {
+            // Se nenhuma sessão de chat específica de post está aberta, mostramos a lista de conversas divididas por post
+            if (!activeChatSession) {
                 appView.innerHTML = `
                     <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
                         <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
-                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-lime-700"></i>Mensagens</h3>
+                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-lime-700"></i>Conversas Isoladas por Post</h3>
                             <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
                         </div>
                         <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs">
-                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><p>Carregando conversas...</p></div>
+                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><p>Carregando conversas por post...</p></div>
                         </div>
                     </div>
                 `;
@@ -1111,28 +1124,53 @@
                 return;
             }
 
+            // Se o usuário logado é o dono do post, mas ainda não escolheu com qual interessado conversar, mostramos a lista de interessados naquele post específico
+            const isOwner = (currentUser.id === activeChatSession.postOwnerId);
+            if (isOwner && !activeChatSession.participantId) {
+                appView.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <button onclick="activeChatSession = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-xs">Interessados no Post:</h3>
+                                    <p class="text-[10px] text-lime-700 font-semibold truncate max-w-xs">${activeChatSession.postTitle}</p>
+                                </div>
+                            </div>
+                            <button onclick="activeChatSession = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
+                        </div>
+                        <div id="post-participants-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs">
+                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin"></i> Carregando interessados...</div>
+                        </div>
+                    </div>
+                `;
+                loadPostParticipants(activeChatSession.postId);
+                return;
+            }
+
+            // Chat Ativo Isolado para este Post e Participante
             appView.innerHTML = `
                 <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                    <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div class="p-3 border-b bg-[#f9faf6] flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <button onclick="${isOwner ? 'activeChatSession.participantId = null; renderChatView();' : 'activeChatSession = null; renderChatView();'}" class="text-gray-500 hover:text-gray-800 mr-1"><i class="fa-solid fa-arrow-left"></i></button>
                             <div class="w-8 h-8 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-xs">
-                                ${activeChatRecipient.name.charAt(0).toUpperCase()}
+                                ${(activeChatSession.participantName || 'Tutor').charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 text-xs">${activeChatRecipient.name}</h3>
-                                <p class="text-[10px] text-emerald-600 font-medium">Chat ativo</p>
+                                <h3 class="font-bold text-gray-900 text-xs">${activeChatSession.participantName || 'Tutor'}</h3>
+                                <p class="text-[10px] text-lime-700 font-medium truncate max-w-[220px]">Post: ${activeChatSession.postTitle}</p>
                             </div>
                         </div>
-                        <button onclick="activeChatRecipient = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
+                        <button onclick="activeChatSession = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
                     </div>
                     
                     <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-[#f9faf6] text-xs">
-                        <div class="text-center text-gray-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Carregando mensagens...</div>
+                        <div class="text-center text-gray-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Carregando conversa isolada...</div>
                     </div>
 
                     <div class="p-3 border-t bg-white flex space-x-2">
-                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem sobre este post..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
                         <button onclick="sendChatMessage()" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Enviar</button>
                     </div>
                 </div>
@@ -1147,6 +1185,7 @@
             if (!inboxContainer) return;
 
             try {
+                // Buscamos todas as mensagens envolvendo o usuário logado
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
@@ -1156,64 +1195,152 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa encontrada. Clique em algum perfil na lateral ou em "Falar com o Tutor" nos alertas.</div>`;
+                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa por post encontrada. Clique em "Conversar Sobre Este Post" em qualquer alerta do feed.</div>`;
                     return;
                 }
 
-                const contactsMap = new Map();
-                data.forEach(msg => {
-                    const isMe = msg.sender_id === currentUser.id;
-                    const contactId = isMe ? msg.recipient_id : msg.sender_id;
-                    const contactName = isMe ? (msg.recipient_name || 'Usuário') : (msg.sender_name || 'Usuário');
+                // Agrupamos por (post_id + o outro usuário envolvido) para garantir isolamento perfeito
+                const conversationsMap = new Map();
 
-                    if (!contactsMap.has(contactId)) {
-                        contactsMap.set(contactId, {
-                            id: contactId,
-                            name: contactName,
+                for (const msg of data) {
+                    const postId = msg.post_id || 'geral';
+                    const isMe = (msg.sender_id === currentUser.id);
+                    const otherUserId = isMe ? msg.recipient_id : msg.sender_id;
+                    const otherUserName = isMe ? (msg.recipient_name || 'Usuário') : (msg.sender_name || 'Usuário');
+
+                    const sessionKey = `${postId}_${otherUserId}`;
+
+                    if (!conversationsMap.has(sessionKey)) {
+                        // Precisamos buscar o título do post se post_id existir
+                        let postTitle = msg.post_title || 'Alerta de Pet';
+                        if (msg.post_id && !msg.post_title) {
+                            const { data: postData } = await window.supabase.from('posts').select('category, breed, pet_name').eq('id', msg.post_id).single();
+                            if (postData) {
+                                postTitle = postData.pet_name ? `${postData.category}: ${postData.pet_name}` : `${postData.category} - ${postData.breed}`;
+                            }
+                        }
+
+                        // Verificamos quem é o dono do post
+                        let postOwnerId = msg.post_owner_id;
+                        if (msg.post_id && !postOwnerId) {
+                            const { data: postData } = await window.supabase.from('posts').select('user_id').eq('id', msg.post_id).single();
+                            if (postData) postOwnerId = postData.user_id;
+                        }
+
+                        conversationsMap.set(sessionKey, {
+                            postId: msg.post_id,
+                            postTitle: postTitle,
+                            postOwnerId: postOwnerId || currentUser.id,
+                            postOwnerName: postOwnerId === currentUser.id ? currentUser.name : otherUserName,
+                            participantId: otherUserId,
+                            participantName: otherUserName,
+                            lastMessage: msg.content,
+                            time: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        });
+                    }
+                }
+
+                const sessions = Array.from(conversationsMap.values());
+
+                inboxContainer.innerHTML = sessions.map(session => `
+                    <div onclick="activeChatSession = { postId: '${session.postId}', postTitle: '${session.postTitle.replace(/'/g, "\\'")}', postOwnerId: '${session.postOwnerId}', postOwnerName: '${session.postOwnerName}', participantId: '${session.participantId}', participantName: '${session.participantName}' }; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
+                                ${session.participantName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">${session.participantName}</h4>
+                                <p class="text-[11px] text-lime-700 font-semibold truncate max-w-xs">Post: ${session.postTitle}</p>
+                                <p class="text-gray-500 truncate max-w-xs text-[10px]">${session.lastMessage}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400">${session.time}</span>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                inboxContainer.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar conversas.</div>`;
+            }
+        }
+
+        async function loadPostParticipants(postId) {
+            const container = document.getElementById('post-participants-list');
+            if (!container) return;
+
+            try {
+                // Buscamos todas as mensagens associadas a este post específico
+                const { data, error } = await window.supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('post_id', postId);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhum interessado enviou mensagem neste post ainda.</div>`;
+                    return;
+                }
+
+                const participantsMap = new Map();
+                data.forEach(msg => {
+                    const otherId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
+                    const otherName = msg.sender_id === currentUser.id ? msg.recipient_name : msg.sender_name;
+
+                    if (otherId && otherId !== currentUser.id && !participantsMap.has(otherId)) {
+                        participantsMap.set(otherId, {
+                            id: otherId,
+                            name: otherName || 'Interessado',
                             lastMessage: msg.content,
                             time: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                         });
                     }
                 });
 
-                const contacts = Array.from(contactsMap.values());
+                const participants = Array.from(participantsMap.values());
 
-                inboxContainer.innerHTML = contacts.map(contact => `
-                    <div onclick="activeChatRecipient = { id: '${contact.id}', name: '${contact.name}' }; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
+                if (participants.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhum interessado conversando neste post ainda.</div>`;
+                    return;
+                }
+
+                container.innerHTML = participants.map(p => `
+                    <div onclick="activeChatSession.participantId = '${p.id}'; activeChatSession.participantName = '${p.name.replace(/'/g, "\\'")}'; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
-                                ${contact.name.charAt(0).toUpperCase()}
+                                ${p.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-900">${contact.name}</h4>
-                                <p class="text-gray-500 truncate max-w-xs">${contact.lastMessage}</p>
+                                <h4 class="font-bold text-gray-900">${p.name}</h4>
+                                <p class="text-gray-500 truncate max-w-xs text-[10px]">${p.lastMessage}</p>
                             </div>
                         </div>
-                        <span class="text-[10px] text-gray-400">${contact.time}</span>
+                        <span class="text-[10px] text-gray-400">${p.time}</span>
                     </div>
                 `).join('');
 
             } catch (err) {
-                inboxContainer.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar lista de conversas.</div>`;
+                container.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar interessados.</div>`;
             }
         }
 
         async function loadMessages() {
-            if (!activeChatRecipient || !currentUser) return;
+            if (!activeChatSession || !activeChatSession.participantId || !currentUser) return;
             const container = document.getElementById('chat-messages-container');
             if (!container) return;
 
             try {
+                // Buscamos apenas as mensagens que pertencem estritamente a este post E entre o usuário logado e o participante selecionado
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
-                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatRecipient.id}),and(sender_id.eq.${activeChatRecipient.id},recipient_id.eq.${currentUser.id})`)
+                    .eq('post_id', activeChatSession.postId)
+                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatSession.participantId}),and(sender_id.eq.${activeChatSession.participantId},recipient_id.eq.${currentUser.id})`)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Nenhuma mensagem trocada ainda com ${activeChatRecipient.name}.</div>`;
+                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Esta é uma conversa isolada sobre o post: <b>${activeChatSession.postTitle}</b>. Envie a primeira mensagem!</div>`;
                     return;
                 }
 
@@ -1237,7 +1364,7 @@
         async function sendChatMessage() {
             const input = document.getElementById('chat-input-text');
             const content = input?.value.trim();
-            if (!content || !activeChatRecipient || !currentUser) return;
+            if (!content || !activeChatSession || !activeChatSession.participantId || !currentUser) return;
 
             input.value = '';
 
@@ -1245,10 +1372,13 @@
                 const { error } = await window.supabase
                     .from('messages')
                     .insert([{
+                        post_id: activeChatSession.postId,
+                        post_title: activeChatSession.postTitle,
+                        post_owner_id: activeChatSession.postOwnerId,
                         sender_id: currentUser.id,
                         sender_name: currentUser.name,
-                        recipient_id: activeChatRecipient.id,
-                        recipient_name: activeChatRecipient.name,
+                        recipient_id: activeChatSession.participantId,
+                        recipient_name: activeChatSession.participantName,
                         content: content
                     }]);
 
