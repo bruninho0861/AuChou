@@ -3,1351 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuChou — Rede Social de Pets Perdidos e Achados</title>
-    <!-- Configuração do PWA (Aplicativo) -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#365314">
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-        
-        const SUPABASE_URL = 'https://upubgrcijudtaitpipax.supabase.co'
-        const SUPABASE_ANON_KEY = 'sb_publishable_XTOMpsiyKBNN0Gj_FGuqdg__0YuMz1V'
-        
-        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    </script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f4fbf4',
-                            100: '#e2f7e2',
-                            500: '#65a30d',
-                            600: '#4d7c0f',
-                            700: '#3f6212'
-                        },
-                        secondary: '#166534',
-                        accent: '#eab308',
-                        siteBg: '#f4f6f0',
-                        headerBg: '#365314'
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Ajuda Pet - Animais Perdidos</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f6f0; color: #1c1917; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .map-container iframe { width: 100%; height: 200px; border-radius: 0.5rem; border: 0; }
-        @keyframes pulse-fast {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.15); }
+        /* Estilos gerais */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
         }
-        .animate-pulse-icon {
-            animation: pulse-fast 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #2b6cb0;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #666;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Card do Post do Animal */
+        .post-animal {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-header h3 {
+            margin: 0;
+            color: #2d3748;
+        }
+
+        .badge.avistado {
+            background-color: #fffae6;
+            color: #b7791f;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .post-body {
+            margin-bottom: 20px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        /* Botão do Mapa */
+        .btn-mapa {
+            display: inline-block;
+            background-color: #3182ce;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-mapa:hover {
+            background-color: #2b6cb0;
+        }
+
+        /* Card de Exclusão de Conta */
+        .card-exclusao {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .card-exclusao h2 {
+            color: #c53030;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Botão Perigoso (Excluir) */
+        .btn-perigoso {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-perigoso:hover {
+            background-color: #c53030;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body>
 
-    <header class="bg-[#365314] text-white shadow-md sticky top-0 z-45">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('feed')">
-                <div class="w-8 h-8 rounded-full bg-[#eab308] text-[#365314] flex items-center justify-center font-black shadow">
-                    <i class="fa-solid fa-paw"></i>
-                </div>
-                <h1 class="text-xl font-black tracking-tight text-white">AuChou <span class="text-xs font-normal text-[#eab308]">Pets</span></h1>
+    <div class="container">
+        <header>
+            <h1>🐾 Plataforma Pet</h1>
+            <p>Ajude a reencontrar animais perdidos</p>
+        </header>
+
+        <!-- SEÇÃO DA PUBLICAÇÃO DO ANIMAL -->
+        <div class="post-animal">
+            <div class="post-header">
+                <h3>🐶 Cachorro Perdido (Caramelo)</h3>
+                <span class="badge avistado">Avistado</span>
+            </div>
+            
+            <div class="post-body">
+                <p><strong>Descrição:</strong> Usava coleira azul, é um pouco arisco mas responde a carinho. Visto por volta das 14h.</p>
+                <p class="local-texto">📍 <strong>Local:</strong> Praça da Matriz, Centro, Itapetininga - SP</p>
             </div>
 
-            <!-- Navigation Links -->
-            <div class="hidden md:flex items-center space-x-1 text-xs font-semibold">
-                <button onclick="switchTab('feed')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Início</button>
-                <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
-                <button onclick="switchTab('chats')" id="nav-chat-btn" class="px-3 py-1.5 hover:bg-white/10 rounded transition relative flex items-center space-x-1.5">
-                    <span>Mensagens por Post</span>
-                    <span id="chat-notification-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
-                </button>
-                <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
-            </div>
-
-            <!-- Search Header -->
-            <div class="flex items-center space-x-2">
-                <div class="relative">
-                    <input type="text" id="global-search-input" oninput="renderFeed()" placeholder="pesquisar pets..." class="pl-3 pr-8 py-1.5 bg-white text-gray-800 rounded text-xs focus:outline-none w-36 sm:w-48 shadow-inner">
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-6">
-        <!-- Visitor Banner if not logged in -->
-        <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-lime-200 flex flex-col md:flex-row items-center justify-between">
-            <div class="mb-4 md:mb-0">
-                <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets!</h2>
-                <p class="text-gray-600 text-xs">Cadastre-se ou entre para criar seu perfil, interagir com tutores nos posts de resgate.</p>
-            </div>
-            <div class="flex space-x-3">
-                <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar</button>
-                <button onclick="openAuthModal('register')" class="bg-gray-100 text-gray-800 px-5 py-2 rounded-lg font-medium text-xs border border-gray-300 hover:bg-gray-200 transition">Cadastre-se</button>
+            <div class="post-footer">
+                <!-- Botão que abre o Google Maps com o endereço do local -->
+                <a href="https://www.google.com/maps/search/?api=1&query=Praça+da+Matriz+Centro+Itapetininga+SP" 
+                   target="_blank" 
+                   class="btn-mapa">
+                   🗺️ Ver Localização no Mapa
+                </a>
             </div>
         </div>
 
-        <div id="app-view">
-            <!-- Feed or active tab content gets injected here -->
-        </div>
-    </main>
-
-    <footer class="bg-white border-t border-gray-200 mt-12 py-4 text-center text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>&copy; 2026 AuChou Pet. Todos os direitos reservados. Conversas 100% isoladas por post.</p>
-            <div class="flex space-x-4">
-                <a href="#" onclick="showAboutModal(); return false;" class="text-lime-700 hover:underline">Sobre o Projeto</a>
-                <a href="#" onclick="showPrivacyModal(); return false;" class="text-lime-700 hover:underline">Privacidade</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Auth Modal -->
-    <div id="modal-auth" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-lime-200">
-            <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div class="text-center mb-5">
-                <div class="w-12 h-12 rounded-full bg-lime-100 text-[#365314] flex items-center justify-center mx-auto mb-2 text-xl font-bold">
-                    <i class="fa-solid fa-paw"></i>
-                </div>
-                <h3 id="auth-modal-title" class="text-lg font-bold text-gray-900">Entrar no AuChou</h3>
-                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Conecte-se com sua rede de tutores e pets</p>
-            </div>
-
-            <form id="auth-form" onsubmit="handleAuthSubmit(event)">
-                <div id="auth-name-field" class="mb-3 hidden">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome Completo</label>
-                    <input type="text" id="auth-name" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">E-mail</label>
-                    <input type="email" id="auth-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="seu@email.com">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Senha</label>
-                    <input type="password" id="auth-password" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="••••••••">
-                    <p id="password-hint" class="text-[11px] text-gray-500 mt-1 hidden">Mínimo 8 caracteres, 1 letra maiúscula e 1 caractere especial (!@#$%...).</p>
+        <!-- SEÇÃO DE CONFIGURAÇÃO / EXCLUSÃO DE CONTA -->
+        <div class="card-exclusao">
+            <h2>⚠️ Zona de Perigo - Excluir Conta</h2>
+            <p>A exclusão da sua conta é permanente e apagará todas as suas publicações. Para confirmar, por favor, insira sua senha:</p>
+            
+            <!-- Substitua 'excluir_conta.php' pelo arquivo do seu backend que vai processar a exclusão -->
+            <form action="excluir_conta.php" method="POST" onsubmit="return confirmarExclusao()">
+                
+                <div class="form-group">
+                    <label for="senha-confirmacao">Sua senha atual:</label>
+                    <input type="password" id="senha-confirmacao" name="senha" required placeholder="Digite sua senha">
                 </div>
                 
-                <div id="auth-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
-
-                <button type="submit" id="auth-submit-btn" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Entrar</button>
+                <button type="submit" class="btn-perigoso">Excluir Minha Conta Definitivamente</button>
             </form>
-
-            <div class="mt-4 text-center">
-                <p id="auth-switch-text" class="text-xs text-gray-600">
-                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>
-                </p>
-                <p id="forgot-password-link-wrap" class="text-xs text-gray-600 mt-2">
-                    <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-gray-500 hover:text-lime-700 hover:underline">Esqueceu sua senha?</a>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Esqueceu a Senha -->
-    <div id="modal-forgot" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-lime-200">
-            <button onclick="closeModal('modal-forgot')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div class="text-center mb-5">
-                <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2 text-xl">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900">Recuperação de Senha</h3>
-                <p class="text-xs text-gray-500 mt-1">Informe seu e-mail cadastrado</p>
-            </div>
-
-            <form id="forgot-step1-form" onsubmit="handleSupabasePasswordReset(event)">
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">E-mail Cadastrado</label>
-                    <input type="email" id="forgot-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="seu@email.com">
-                </div>
-                <div id="forgot-error-msg-1" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
-                <button type="submit" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Enviar Link de Recuperação</button>
-            </form>
-
-            <div class="mt-4 text-center">
-                <a href="#" onclick="backToLoginFromForgot(); return false;" class="text-xs text-lime-700 font-semibold hover:underline">Voltar para o login</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Criar/Editar Alerta com Google Maps Incorporado -->
-    <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8 border border-lime-200">
-            <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900 mb-4">Criar Alerta de Pet</h3>
-
-            <form id="post-form" onsubmit="handlePostSubmit(event)">
-                <input type="hidden" id="post-edit-id">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Categoria / Tipo de Alerta</label>
-                        <select id="post-category" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Cão Perdido">Cão Perdido</option>
-                            <option value="Cão Achado">Cão Achado</option>
-                            <option value="Gato Perdido">Gato Perdido</option>
-                            <option value="Gato Achado">Gato Achado</option>
-                            <option value="Outros Pets - Perdido">Outros Pets - Perdido</option>
-                            <option value="Outros Pets - Achado">Outros Pets - Achado</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome do Pet (se conhecido)</label>
-                        <input type="text" id="post-pet-name" placeholder="Ex: Mel, Thor" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Espécie</label>
-                        <select id="post-species" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Cão">Cão</option>
-                            <option value="Gato">Gato</option>
-                            <option value="Outro">Outro</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Raça</label>
-                        <input type="text" id="post-breed" required placeholder="Ex: Poodle, SRD" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Porte</label>
-                        <select id="post-size" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Pequeno">Pequeno</option>
-                            <option value="Médio">Médio</option>
-                            <option value="Grande">Grande</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Cor Predominante</label>
-                        <input type="text" id="post-color" required placeholder="Ex: Marrom e Branco" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Local (Bairro/Cidade)</label>
-                        <input type="text" id="post-location" required placeholder="Ex: Centro, Itapetininga - SP" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                    </div>
-                </div>
-
-                <!-- Google Maps Incorporado -->
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-lime-800 uppercase mb-1">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Mapa da Região (Itapetininga - SP):
-                    </label>
-                    <div class="map-container shadow-inner rounded overflow-hidden border border-lime-200">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117003.81596214893!2d-48.029943!3d-23.5910868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5cc70ba456a65%3A0x770be09241987369!2sItapetininga%2C%20SP!5e0!3m2!1spt-BR!2sbr!4v1789480489079!5m2!1spt-BR!2sbr" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                    </div>
-                    <p class="text-[10px] text-gray-500 mt-1">Consulte o mapa acima para referência da região de busca.</p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Data e Horário</label>
-                        <input type="datetime-local" id="post-datetime" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Status</label>
-                        <select id="post-status" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
-                            <option value="Procurando">Procurando / Ativo</option>
-                            <option value="Reunido">Reunido com a Família / Solucionado</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Foto do Animal</label>
-                    <input type="file" id="post-photo-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-lime-100 file:text-lime-800 hover:file:bg-lime-200" onchange="handleImageResize(event, 800, 'post-photo-url')">
-                    <input type="hidden" id="post-photo-url">
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Características Marcantes e Descrição</label>
-                    <textarea id="post-desc" rows="3" required placeholder="Coleira azul, mancha na orelha direita..." class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]"></textarea>
-                </div>
-
-                <div id="post-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
-
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal('modal-post')" class="px-4 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-[#365314] text-white font-medium rounded text-xs hover:bg-lime-900 transition shadow">Publicar Alerta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Visualizar Perfil de Outro Usuário -->
-    <div id="modal-view-profile" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative text-center border border-lime-200">
-            <button onclick="closeModal('modal-view-profile')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <div id="view-profile-content">
-                <!-- Conteúdo injetado via JS -->
-            </div>
         </div>
     </div>
 
     <script>
-        const ADMIN_EMAIL = 'bruninho0861@gmail.com';
-
-        let currentUser = null;
-        let isAdminLoggedIn = false;
-        let currentActiveTab = 'feed';
-        let activeChatSession = null; 
-        let isRegisterMode = false;
-        let allRegisteredUsers = [];
-        let lastKnownMessageCount = 0;
-        let notificationInterval = null;
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const checkSupabaseReady = setInterval(async () => {
-                if (window.supabase) {
-                    clearInterval(checkSupabaseReady);
-                    
-                    const { data: { session } } = await window.supabase.auth.getSession();
-                    if (session) {
-                        await fetchUserProfile(session.user);
-                        startMessagePolling();
-                    }
-                    await fetchAllUsers();
-                    updateNavigationUI();
-                    renderFeed();
-                }
-            }, 100);
-        });
-
-        async function fetchAllUsers() {
-            try {
-                const { data, error } = await window.supabase
-                    .from('posts')
-                    .select('user_id, user_name, user_avatar, location');
-
-                if (error) throw error;
-                
-                const uniqueMap = new Map();
-                if (data) {
-                    data.forEach(p => {
-                        if (p.user_id && !uniqueMap.has(p.user_id)) {
-                            uniqueMap.set(p.user_id, {
-                                id: p.user_id,
-                                name: p.user_name || 'Usuário AuChou',
-                                avatar: p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-                                region: p.location || 'Itapetininga - SP'
-                            });
-                        }
-                    });
-                }
-                
-                if (currentUser && !uniqueMap.has(currentUser.id)) {
-                    uniqueMap.set(currentUser.id, {
-                        id: currentUser.id,
-                        name: currentUser.name,
-                        avatar: currentUser.avatar,
-                        region: currentUser.region
-                    });
-                }
-
-                allRegisteredUsers = Array.from(uniqueMap.values());
-            } catch (err) {
-                console.error("Erro ao carregar usuários:", err);
-            }
-        }
-
-        function startMessagePolling() {
-            if (!currentUser) return;
-            if (notificationInterval) clearInterval(notificationInterval);
-
-            checkNewMessagesCount(true);
-
-            notificationInterval = setInterval(() => {
-                checkNewMessagesCount(false);
-            }, 3000);
-        }
-
-        async function checkNewMessagesCount(isInitial = false) {
-            if (!currentUser) return;
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('id, recipient_id')
-                    .eq('recipient_id', currentUser.id);
-
-                if (error) return;
-
-                const totalMessages = data ? data.length : 0;
-
-                if (isInitial) {
-                    lastKnownMessageCount = totalMessages;
-                } else if (totalMessages > lastKnownMessageCount) {
-                    triggerChatNotificationPulse();
-                    showToast("💬 Você recebeu uma nova mensagem num post!", "success");
-                    lastKnownMessageCount = totalMessages;
-                    
-                    if (currentActiveTab === 'chats') {
-                        if (activeChatSession) {
-                            loadMessages();
-                        } else {
-                            loadInboxConversations();
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Erro ao checar mensagens:", err);
-            }
-        }
-
-        function triggerChatNotificationPulse() {
-            const dot = document.getElementById('chat-notification-dot');
-            if (dot) {
-                dot.classList.remove('hidden');
-            }
-        }
-
-        function clearChatNotificationPulse() {
-            const dot = document.getElementById('chat-notification-dot');
-            if (dot) {
-                dot.classList.add('hidden');
-            }
-        }
-
-        function handleImageResize(event, maxDimension, targetInputId, previewImgId = null) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (maxDimension === 400) {
-                        const size = Math.min(width, height);
-                        canvas.width = 400;
-                        canvas.height = 400;
-                        const ctx = canvas.getContext('2d');
-                        const startX = (width - size) / 2;
-                        const startY = (height - size) / 2;
-                        ctx.drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
-                    } else {
-                        if (width > height) {
-                            if (width > maxDimension) {
-                                height = Math.round((height * maxDimension) / width);
-                                width = maxDimension;
-                            }
-                        } else {
-                            if (height > maxDimension) {
-                                width = Math.round((width * maxDimension) / height);
-                                height = maxDimension;
-                            }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                    }
-
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                    document.getElementById(targetInputId).value = compressedDataUrl;
-
-                    if (previewImgId) {
-                        const previewEl = document.getElementById(previewImgId);
-                        if (previewEl) previewEl.src = compressedDataUrl;
-                    }
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function fetchUserProfile(authUser) {
-            currentUser = {
-                id: authUser.id,
-                name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
-                email: authUser.email,
-                avatar: authUser.user_metadata?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-                bio: authUser.user_metadata?.bio || 'Membro da comunidade AuChou Pets.',
-                region: authUser.user_metadata?.region || 'Itapetininga - SP'
-            };
-            if (currentUser.email === ADMIN_EMAIL) isAdminLoggedIn = true;
-        }
-
-        function updateNavigationUI() {
-            const visitorBanner = document.getElementById('visitor-banner');
-            if (currentUser) {
-                if (visitorBanner) visitorBanner.classList.add('hidden');
-            } else {
-                if (visitorBanner) visitorBanner.classList.remove('hidden');
-            }
-        }
-
-        function openAuthModal(mode) {
-            const modal = document.getElementById('modal-auth');
-            const titleEl = document.getElementById('auth-modal-title');
-            const subtitleEl = document.getElementById('auth-modal-subtitle');
-            const nameField = document.getElementById('auth-name-field');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const switchText = document.getElementById('auth-switch-text');
-            const passwordHint = document.getElementById('password-hint');
-            const errorEl = document.getElementById('auth-error-msg');
-
-            errorEl.classList.add('hidden');
-            document.getElementById('auth-form').reset();
-
-            if (mode === 'register') {
-                isRegisterMode = true;
-                titleEl.innerText = 'Criar Conta no AuChou';
-                subtitleEl.innerText = 'Cadastre-se para interagir na rede';
-                nameField.classList.remove('hidden');
-                submitBtn.innerText = 'Cadastrar';
-                switchText.innerHTML = `Já tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Entrar</a>`;
-                passwordHint.classList.remove('hidden');
-            } else {
-                isRegisterMode = false;
-                titleEl.innerText = 'Entrar no AuChou';
-                subtitleEl.innerText = 'Conecte-se para ajudar animais perdidos';
-                nameField.classList.add('hidden');
-                submitBtn.innerText = 'Entrar';
-                switchText.innerHTML = `Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Cadastre-se</a>`;
-                passwordHint.classList.add('hidden');
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function toggleAuthMode() {
-            openAuthModal(isRegisterMode ? 'login' : 'register');
-        }
-
-        function openForgotPasswordModal() {
-            closeModal('modal-auth');
-            document.getElementById('forgot-step1-form').reset();
-            document.getElementById('forgot-error-msg-1').classList.add('hidden');
-            document.getElementById('modal-forgot').classList.remove('hidden');
-        }
-
-        function backToLoginFromForgot() {
-            closeModal('modal-forgot');
-            openAuthModal('login');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        async function handleSupabasePasswordReset(event) {
-            event.preventDefault();
-            const email = document.getElementById('forgot-email').value.trim();
-            const errorEl = document.getElementById('forgot-error-msg-1');
-
-            const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.href.split('#')[0]
-            });
-
-            if (error) {
-                errorEl.innerText = error.message;
-                errorEl.classList.remove('hidden');
-            } else {
-                showToast('E-mail de recuperação enviado com sucesso!', 'success');
-                closeModal('modal-forgot');
-            }
-        }
-
-        async function handleAuthSubmit(event) {
-            event.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-            const errorEl = document.getElementById('auth-error-msg');
-
-            errorEl.classList.add('hidden');
-
-            if (isRegisterMode) {
-                const name = document.getElementById('auth-name').value.trim();
-                if (!name) {
-                    errorEl.innerText = 'Preencha o seu nome completo.';
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
-
-                const { data, error } = await window.supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: { full_name: name, avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' }
-                    }
-                });
-
-                if (error) {
-                    errorEl.innerText = error.message;
-                    errorEl.classList.remove('hidden');
-                } else {
-                    showToast('Cadastro realizado com sucesso!', 'success');
-                    closeModal('modal-auth');
-                }
-            } else {
-                const { data, error } = await window.supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) {
-                    errorEl.innerText = 'E-mail ou senha incorretos.';
-                    errorEl.classList.remove('hidden');
-                } else {
-                    await fetchUserProfile(data.user);
-                    await fetchAllUsers();
-                    startMessagePolling();
-                    closeModal('modal-auth');
-                    updateNavigationUI();
-                    renderFeed();
-                    showToast('Login realizado com sucesso!', 'success');
-                }
-            }
-        }
-
-        async function handleLogout() {
-            if (notificationInterval) clearInterval(notificationInterval);
-            await window.supabase.auth.signOut();
-            currentUser = null;
-            isAdminLoggedIn = false;
-            updateNavigationUI();
-            renderFeed();
-            showToast('Sessão encerrada.', 'info');
-        }
-
-        function showToast(message, type = 'success') {
-            const existingToast = document.getElementById('auchou-toast');
-            if (existingToast) existingToast.remove();
-
-            const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-[#365314]' };
-            const toast = document.createElement('div');
-            toast.id = 'auchou-toast';
-            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success} transition-all duration-300 transform translate-y-0`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-sm"></i><span>${message}</span>`;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 400);
-            }, 4000);
-        }
-
-        async function renderFeed() {
-            currentActiveTab = 'feed';
-            const appView = document.getElementById('app-view');
-            
-            appView.innerHTML = `
-                <div class="flex flex-col justify-center items-center py-20">
-                    <i class="fa-solid fa-spinner fa-spin text-lime-600 text-4xl mb-3"></i>
-                    <span class="text-gray-500 font-medium">Carregando feed...</span>
-                </div>
-            `;
-
-            let posts = [];
-            try {
-                const { data, error } = await window.supabase
-                    .from('posts')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                posts = data || [];
-            } catch (err) {
-                console.error("Erro ao carregar os posts:", err);
-            }
-
-            await fetchAllUsers();
-
-            const normalizedPosts = posts.map(p => ({
-                id: p.id,
-                userId: p.user_id || p.userId,
-                userName: p.user_name || p.userName,
-                userAvatar: p.user_avatar || p.userAvatar,
-                category: p.category,
-                species: p.species,
-                breed: p.breed,
-                size: p.size,
-                color: p.color,
-                location: p.location,
-                datetime: p.datetime,
-                status: p.status,
-                photo: p.photo,
-                description: p.description,
-                createdAt: p.created_at || p.createdAt,
-                petName: p.pet_name || p.petName
-            }));
-
-            const searchKeyword = document.getElementById('global-search-input')?.value?.toLowerCase() || '';
-
-            const filteredPosts = normalizedPosts.filter(post => {
-                if (searchKeyword) {
-                    const matchText = `${post.breed} ${post.petName || ''} ${post.location} ${post.description} ${post.category}`.toLowerCase();
-                    if (!matchText.includes(searchKeyword)) return false;
-                }
-                return true;
-            });
-
-            const myAvatar = currentUser ? currentUser.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
-            const myName = currentUser ? currentUser.name : 'Visitante';
-            const myRegion = currentUser ? currentUser.region : 'Itapetininga - SP';
-
-            const sidebarUsers = allRegisteredUsers.slice(0, 9);
-
-            appView.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-start">
-                    
-                    <!-- Coluna Esquerda: Perfil e Atalhos -->
-                    <div class="md:col-span-1 space-y-3">
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-center">
-                            <img src="${myAvatar}" alt="${myName}" class="w-24 h-24 rounded-full mx-auto object-cover mb-2 border-2 border-lime-500 shadow-sm">
-                            <h3 class="font-bold text-xs text-lime-800">${myName}</h3>
-                            <p class="text-[10px] text-gray-500 mb-3"><i class="fa-solid fa-location-dot mr-1"></i>${myRegion}</p>
-                            
-                            <div class="text-left text-[11px] space-y-2 border-t border-gray-100 pt-3 text-gray-700 font-medium">
-                                <p><a href="#" onclick="switchTab('profile'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-user mr-2 w-4 text-center"></i> meu perfil</a></p>
-                                <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens por post</a></p>
-                                <p><a href="#" onclick="openPostModal(); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-bullhorn mr-2 w-4 text-center"></i> criar alerta</a></p>
-                                ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar</a></p>`}
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-xs">
-                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Comunidades Pet</h4>
-                            <ul class="space-y-1.5 text-[11px] text-lime-700 font-medium">
-                                <li><a href="#" onclick="showToast('Comunidade: Amigos dos Pets Perdidos', 'info'); return false;" class="hover:underline">• Amigos dos Pets</a></li>
-                                <li><a href="#" onclick="showToast('Comunidade: Resgate Itapetininga', 'info'); return false;" class="hover:underline">• Resgate Itapetininga</a></li>
-                                <li><a href="#" onclick="showToast('Comunidade: Adote com Amor', 'info'); return false;" class="hover:underline">• Adote com Amor</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Coluna Central: Feed de Alertas -->
-                    <div class="md:col-span-2 lg:col-span-3 space-y-4">
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 flex items-center justify-between">
-                            <span class="text-xs font-bold text-gray-800">Alertas Recentes (${filteredPosts.length})</span>
-                            <button onclick="openPostModal()" class="bg-[#365314] text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow hover:bg-lime-900">Novo Alerta</button>
-                        </div>
-                        <div id="posts-container" class="space-y-4">
-                            ${filteredPosts.length === 0 ? `<div class="bg-white rounded-xl p-8 text-center border border-lime-200"><p class="text-xs text-gray-500">Nenhum pet encontrado.</p></div>` : filteredPosts.map(post => renderPostCard(post)).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Coluna Direita: Perfis de Usuários -->
-                    <div class="md:col-span-1 space-y-4">
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200">
-                            <div class="flex items-center justify-between mb-3 border-b pb-1.5">
-                                <h4 class="font-bold text-xs text-gray-800">Membros (${allRegisteredUsers.length})</h4>
-                                <span class="text-[10px] text-lime-700 cursor-pointer font-medium" onclick="showToast('Exibindo todos os membros cadastrados', 'info')">ver todos</span>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-2.5">
-                                ${sidebarUsers.length === 0 ? `
-                                    <div class="col-span-3 text-center text-gray-400 py-6 text-[11px]">Nenhum membro cadastrado ainda.</div>
-                                ` : sidebarUsers.map(u => `
-                                    <div class="text-center cursor-pointer group" onclick="viewUserProfileCard('${u.id}', '${u.name}', '${u.avatar}', '${u.region}')" title="Ver perfil de ${u.name}">
-                                        <div class="w-16 h-16 mx-auto rounded-lg overflow-hidden border border-lime-300 bg-gray-100 shadow-sm">
-                                            <img src="${u.avatar}" alt="${u.name}" class="w-full h-full object-cover group-hover:scale-105 transition">
-                                        </div>
-                                        <p class="text-[10px] text-lime-800 truncate mt-1 group-hover:underline font-semibold">${u.name.split(' ')[0]}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-xs">
-                            <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Dica AuChou</h4>
-                            <p class="text-[11px] text-gray-500">Cada conversa fica isolada exclusivamente no post do animal correspondente!</p>
-                        </div>
-                    </div>
-
-                </div>
-            `;
-        }
-
-        function viewUserProfileCard(userId, userName, userAvatar, userRegion) {
-            const modal = document.getElementById('modal-view-profile');
-            const content = document.getElementById('view-profile-content');
-            
-            content.innerHTML = `
-                <img src="${userAvatar}" alt="${userName}" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-lime-500 shadow-md mb-3">
-                <h3 class="font-bold text-base text-gray-900">${userName}</h3>
-                <p class="text-xs text-gray-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${userRegion}</p>
-                <p class="text-xs text-gray-600 mb-4 bg-lime-50 p-2.5 rounded border border-lime-100">Membro da rede AuChou Pets dedicado a auxiliar na localização e resgate de animais.</p>
-                <div class="flex space-x-2">
-                    <button onclick="closeModal('modal-view-profile'); switchTab('feed');" class="flex-1 bg-[#365314] text-white py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">
-                        <i class="fa-solid fa-paw mr-1"></i> Ver Alertas do Tutor
-                    </button>
-                    <button onclick="closeModal('modal-view-profile')" class="px-3 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50">Fechar</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-        }
-
-        function renderPostCard(post) {
-            let deleteButtonHtml = '';
-            const isAdmin = currentUser && (currentUser.email === ADMIN_EMAIL || isAdminLoggedIn);
-            const isOwner = currentUser && (post.userId === currentUser.id);
-
-            if (isAdmin || isOwner) {
-                const btnTitle = isAdmin && !isOwner ? "Excluir como Administrador" : "Excluir minha publicação";
-                const btnColor = isAdmin && !isOwner ? "bg-red-600 hover:bg-red-700 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300";
-                
-                deleteButtonHtml = `
-                    <button onclick="handleDeletePost('${post.id}')" class="${btnColor} px-2.5 py-1 rounded text-[11px] font-medium transition flex items-center space-x-1" title="${btnTitle}">
-                        <i class="fa-solid fa-trash"></i>
-                        <span>${isAdmin && !isOwner ? 'Excluir (Admin)' : 'Excluir'}</span>
-                    </button>
-                `;
-            }
-
-            const postTitleText = post.petName ? `${post.category}: ${post.petName} (${post.breed})` : `${post.category} - ${post.breed}`;
-
-            return `
-                <div class="bg-white rounded-xl shadow-sm border border-lime-200 overflow-hidden text-xs">
-                    <div class="p-3.5 flex items-center justify-between border-b border-gray-100 bg-[#f9faf6]">
-                        <div class="flex items-center space-x-2.5 cursor-pointer" onclick="viewUserProfileCard('${post.userId}', '${post.userName}', '${post.userAvatar}', '${post.location}')">
-                            <img src="${post.userAvatar}" alt="${post.userName}" class="w-9 h-9 rounded-full object-cover border border-lime-300">
-                            <div>
-                                <h4 class="font-bold text-gray-900 hover:underline">${post.userName}</h4>
-                                <p class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-lime-100 text-lime-800">
-                                ${post.category}
-                            </span>
-                            ${deleteButtonHtml}
-                        </div>
-                    </div>
-                    <div class="relative bg-gray-100 max-h-80 overflow-hidden cursor-pointer">
-                        <img src="${post.photo}" alt="${post.breed}" class="w-full h-full object-cover max-h-80">
-                    </div>
-                    <div class="p-4">
-                        ${post.petName ? `<p class="font-bold text-gray-800 mb-1">Nome do Pet: ${post.petName}</p>` : ''}
-                        <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
-                    </div>
-                    <div class="p-3.5 border-t border-gray-100 flex justify-between items-center bg-[#f9faf6]">
-                        <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
-                        <button onclick="openChatForPost('${post.id}', '${postTitleText.replace(/'/g, "\\'")}', '${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
-                            <i class="fa-solid fa-comment mr-1.5"></i> ${isOwner ? 'Ver Conversas Deste Post' : 'Conversar Sobre Este Post'}
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function handleDeletePost(postId) {
-            if (!currentUser) return;
-            const confirmed = confirm("Tem certeza que deseja excluir esta publicação e suas conversas associadas?");
-            if (!confirmed) return;
-
-            try {
-                const { error } = await window.supabase.from('posts').delete().eq('id', postId);
-                if (error) throw error;
-                showToast("Publicação excluída com sucesso!", "success");
-                renderFeed();
-            } catch (err) {
-                showToast("Erro ao excluir publicação: " + err.message, "error");
-            }
-        }
-
-        function openChatForPost(postId, postTitle, postOwnerId, postOwnerName) {
-            if (!currentUser) {
-                openAuthModal('login');
-                return;
-            }
-            if (!postId) {
-                showToast("Erro: ID da publicação não encontrado.", "error");
-                return;
-            }
-
-            const participantId = (currentUser.id === postOwnerId) ? null : postOwnerId;
-            const participantName = (currentUser.id === postOwnerId) ? null : postOwnerName;
-
-            activeChatSession = {
-                postId: postId,
-                postTitle: postTitle,
-                postOwnerId: postOwnerId,
-                postOwnerName: postOwnerName,
-                participantId: participantId,
-                participantName: participantName
-            };
-
-            switchTab('chats');
-        }
-
-        function openPostModal() {
-            if (!currentUser) { openAuthModal('login'); return; }
-            const modal = document.getElementById('modal-post');
-            document.getElementById('post-form').reset();
-            document.getElementById('post-photo-url').value = '';
-            modal.classList.remove('hidden');
-        }
-
-        async function handlePostSubmit(event) {
-            event.preventDefault();
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerText;
-            submitBtn.innerText = 'Publicando...';
-            submitBtn.disabled = true;
-
-            const category = document.getElementById('post-category').value;
-            const pet_name = document.getElementById('post-pet-name').value.trim();
-            const breed = document.getElementById('post-breed').value.trim();
-            const size = document.getElementById('post-size').value;
-            const color = document.getElementById('post-color').value.trim();
-            const location = document.getElementById('post-location').value.trim();
-            const datetime = document.getElementById('post-datetime').value;
-            const status = document.getElementById('post-status').value;
-            let photo = document.getElementById('post-photo-url').value.trim();
-            const description = document.getElementById('post-desc').value.trim();
-
-            if (!photo) {
-                photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600';
-            }
-
-            const newPost = {
-                user_id: currentUser.id,
-                user_name: currentUser.name,
-                user_avatar: currentUser.avatar,
-                pet_name: pet_name,
-                category: category,
-                species: document.getElementById('post-species').value,
-                breed: breed,
-                size: size,
-                color: color,
-                location: location,
-                datetime: datetime,
-                status: status,
-                photo: photo,
-                description: description,
-                likes: []
-            };
-
-            try {
-                const { error } = await window.supabase.from('posts').insert([newPost]);
-                if (error) throw error;
-                
-                closeModal('modal-post');
-                document.getElementById('post-form').reset();
-                document.getElementById('post-photo-url').value = '';
-                
-                renderFeed();
-                showToast('Alerta publicado com sucesso!', 'success');
-            } catch (err) {
-                const errorMsg = document.getElementById('post-error-msg');
-                errorMsg.innerText = "Erro ao publicar alerta: " + err.message;
-                errorMsg.classList.remove('hidden');
-            } finally {
-                submitBtn.innerText = originalBtnText;
-                submitBtn.disabled = false;
-            }
-        }
-
-        function switchTab(tab) {
-            currentActiveTab = tab;
-            if (tab === 'feed') renderFeed();
-            else if (tab === 'profile') renderProfileView();
-            else if (tab === 'chats') {
-                clearChatNotificationPulse();
-                renderChatView();
-            }
-        }
-
-        function renderProfileView() {
-            if (!currentUser) { openAuthModal('login'); return; }
-            const appView = document.getElementById('app-view');
-            appView.innerHTML = `
-                <div class="max-w-xl mx-auto space-y-4 text-xs">
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-lime-200">
-                        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
-                            <div class="relative group">
-                                <img id="profile-avatar-preview" src="${currentUser.avatar}" class="w-24 h-24 rounded-full object-cover border-4 border-lime-500 shadow-md">
-                                <label for="profile-photo-input" class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                                    <i class="fa-solid fa-camera text-lg"></i>
-                                </label>
-                                <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleImageResize(event, 400, 'profile-edit-avatar', 'profile-avatar-preview')">
-                            </div>
-                            <div class="text-center sm:text-left">
-                                <h2 class="font-bold text-base text-gray-900">${currentUser.name}</h2>
-                                <p class="text-gray-500">${currentUser.email}</p>
-                                <p class="text-gray-600 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
-                            </div>
-                        </div>
-
-                        <form onsubmit="handleProfileUpdate(event)" class="space-y-3 border-t pt-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome Completo</label>
-                                <input type="text" id="profile-edit-name" value="${currentUser.name}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Região / Cidade</label>
-                                <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
-                            </div>
-                            <input type="hidden" id="profile-edit-avatar" value="${currentUser.avatar}">
-                            
-                            <div class="flex items-center justify-between pt-2">
-                                <button type="button" onclick="confirmDeleteAccount()" class="text-red-600 hover:text-red-800 text-xs font-semibold flex items-center space-x-1">
-                                    <i class="fa-solid fa-user-xmark"></i>
-                                    <span>Excluir Minha Conta / Página</span>
-                                </button>
-                                <button type="submit" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Salvar Alterações</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function handleProfileUpdate(event) {
-            event.preventDefault();
-            const newName = document.getElementById('profile-edit-name').value.trim();
-            const newRegion = document.getElementById('profile-edit-region').value.trim();
-            const newAvatar = document.getElementById('profile-edit-avatar').value.trim();
-
-            currentUser.name = newName;
-            currentUser.region = newRegion;
-            currentUser.avatar = newAvatar;
-
-            const { error } = await window.supabase.auth.updateUser({
-                data: { full_name: newName, avatar: newAvatar, region: newRegion }
-            });
-
-            if (error) {
-                showToast("Erro ao atualizar perfil: " + error.message, "error");
-            } else {
-                showToast("Perfil atualizado com sucesso!", "success");
-                updateNavigationUI();
-            }
-        }
-
-        async function confirmDeleteAccount() {
-            const confirmMsg = prompt("Para confirmar a exclusão definitiva da sua conta e remoção dos seus dados do AuChou, digite EXCLUIR abaixo:");
-            if (confirmMsg !== "EXCLUIR") {
-                showToast("Ação cancelada. Sua conta permanece ativa.", "info");
-                return;
-            }
-
-            try {
-                // Remove os posts do usuário antes de encerrar
-                await window.supabase.from('posts').delete().eq('user_id', currentUser.id);
-                
-                showToast("Conta e dados removidos com sucesso.", "success");
-                await handleLogout();
-            } catch (err) {
-                showToast("Erro ao excluir conta: " + err.message, "error");
-            }
-        }
-
-        async function renderChatView() {
-            if (!currentUser) { openAuthModal('login'); return; }
-            clearChatNotificationPulse();
-            const appView = document.getElementById('app-view');
-            
-            if (!activeChatSession) {
-                appView.innerHTML = `
-                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
-                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-lime-700"></i>Conversas Isoladas por Post</h3>
-                            <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
-                        </div>
-                        <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs">
-                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><p>Carregando conversas por post...</p></div>
-                        </div>
-                    </div>
-                `;
-                loadInboxConversations();
-                return;
-            }
-
-            const isOwner = (currentUser.id === activeChatSession.postOwnerId);
-            if (isOwner && !activeChatSession.participantId) {
-                appView.innerHTML = `
-                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <button onclick="activeChatSession = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
-                                <div>
-                                    <h3 class="font-bold text-gray-900 text-xs">Interessados no Post:</h3>
-                                    <p class="text-[10px] text-lime-700 font-semibold truncate max-w-xs">${activeChatSession.postTitle}</p>
-                                </div>
-                            </div>
-                            <button onclick="activeChatSession = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
-                        </div>
-                        <div id="post-participants-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs">
-                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin"></i> Carregando interessados...</div>
-                        </div>
-                    </div>
-                `;
-                loadPostParticipants(activeChatSession.postId);
-                return;
-            }
-
-            appView.innerHTML = `
-                <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
-                    <div class="p-3 border-b bg-[#f9faf6] flex items-center justify-between">
-                        <div class="flex items-center space-x-2.5">
-                            <button onclick="${isOwner ? 'activeChatSession.participantId = null; renderChatView();' : 'activeChatSession = null; renderChatView();'}" class="text-gray-500 hover:text-gray-800 mr-1"><i class="fa-solid fa-arrow-left"></i></button>
-                            <div class="w-8 h-8 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-xs">
-                                ${(activeChatSession.participantName || 'Tutor').charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-xs">${activeChatSession.participantName || 'Tutor'}</h3>
-                                <p class="text-[10px] text-lime-700 font-medium truncate max-w-[220px]">Post: ${activeChatSession.postTitle}</p>
-                            </div>
-                        </div>
-                        <button onclick="activeChatSession = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
-                    </div>
-                    
-                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-[#f9faf6] text-xs">
-                        <div class="text-center text-gray-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Carregando conversa isolada...</div>
-                    </div>
-
-                    <div class="p-3 border-t bg-white flex space-x-2">
-                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem sobre este post..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                        <button onclick="sendChatMessage()" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Enviar</button>
-                    </div>
-                </div>
-            `;
-
-            loadMessages();
-        }
-
-        async function loadInboxConversations() {
-            if (!currentUser) return;
-            const inboxContainer = document.getElementById('chat-inbox-list');
-            if (!inboxContainer) return;
-
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('*')
-                    .or(`sender_id.eq.${currentUser.id},recipient_id.eq.${currentUser.id}`)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa por post encontrada. Clique em "Conversar Sobre Este Post" em qualquer alerta do feed.</div>`;
-                    return;
-                }
-
-                const conversationsMap = new Map();
-
-                for (const msg of data) {
-                    const postId = msg.post_id || 'geral';
-                    const isMe = (msg.sender_id === currentUser.id);
-                    const otherUserId = isMe ? msg.recipient_id : msg.sender_id;
-                    const otherUserName = isMe ? (msg.recipient_name || 'Usuário') : (msg.sender_name || 'Usuário');
-
-                    const sessionKey = `${postId}_${otherUserId}`;
-
-                    if (!conversationsMap.has(sessionKey)) {
-                        let postTitle = msg.post_title || 'Alerta de Pet';
-                        if (msg.post_id && !msg.post_title) {
-                            const { data: postData } = await window.supabase.from('posts').select('category, breed, pet_name').eq('id', msg.post_id).single();
-                            if (postData) {
-                                postTitle = postData.pet_name ? `${postData.category}: ${postData.pet_name}` : `${postData.category} - ${postData.breed}`;
-                            }
-                        }
-
-                        let postOwnerId = msg.post_owner_id;
-                        if (msg.post_id && !postOwnerId) {
-                            const { data: postData } = await window.supabase.from('posts').select('user_id').eq('id', msg.post_id).single();
-                            if (postData) postOwnerId = postData.user_id;
-                        }
-
-                        conversationsMap.set(sessionKey, {
-                            postId: msg.post_id,
-                            postTitle: postTitle,
-                            postOwnerId: postOwnerId || currentUser.id,
-                            postOwnerName: postOwnerId === currentUser.id ? currentUser.name : otherUserName,
-                            participantId: otherUserId,
-                            participantName: otherUserName,
-                            lastMessage: msg.content,
-                            time: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                        });
-                    }
-                }
-
-                const sessions = Array.from(conversationsMap.values());
-
-                inboxContainer.innerHTML = sessions.map(session => `
-                    <div onclick="activeChatSession = { postId: '${session.postId}', postTitle: '${session.postTitle.replace(/'/g, "\\'")}', postOwnerId: '${session.postOwnerId}', postOwnerName: '${session.postOwnerName}', participantId: '${session.participantId}', participantName: '${session.participantName}' }; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
-                                ${session.participantName.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900">${session.participantName}</h4>
-                                <p class="text-[11px] text-lime-700 font-semibold truncate max-w-xs">Post: ${session.postTitle}</p>
-                                <p class="text-gray-500 truncate max-w-xs text-[10px]">${session.lastMessage}</p>
-                            </div>
-                        </div>
-                        <span class="text-[10px] text-gray-400">${session.time}</span>
-                    </div>
-                `).join('');
-
-            } catch (err) {
-                inboxContainer.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar conversas.</div>`;
-            }
-        }
-
-        async function loadPostParticipants(postId) {
-            const container = document.getElementById('post-participants-list');
-            if (!container) return;
-
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('*')
-                    .eq('post_id', postId);
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhum interessado enviou mensagem neste post ainda.</div>`;
-                    return;
-                }
-
-                const participantsMap = new Map();
-                data.forEach(msg => {
-                    const otherId = msg.sender_id === currentUser.id ? msg.recipient_id : msg.sender_id;
-                    const otherName = msg.sender_id === currentUser.id ? msg.recipient_name : msg.sender_name;
-
-                    if (otherId && otherId !== currentUser.id && !participantsMap.has(otherId)) {
-                        participantsMap.set(otherId, {
-                            id: otherId,
-                            name: otherName || 'Interessado',
-                            lastMessage: msg.content,
-                            time: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                        });
-                    }
-                });
-
-                const participants = Array.from(participantsMap.values());
-
-                if (participants.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhum interessado conversando neste post ainda.</div>`;
-                    return;
-                }
-
-                container.innerHTML = participants.map(p => `
-                    <div onclick="activeChatSession.participantId = '${p.id}'; activeChatSession.participantName = '${p.name.replace(/'/g, "\\'")}'; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
-                                ${p.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900">${p.name}</h4>
-                                <p class="text-gray-500 truncate max-w-xs text-[10px]">${p.lastMessage}</p>
-                            </div>
-                        </div>
-                        <span class="text-[10px] text-gray-400">${p.time}</span>
-                    </div>
-                `).join('');
-
-            } catch (err) {
-                container.innerHTML = `<div class="text-center text-red-500 py-8">Erro ao carregar interessados.</div>`;
-            }
-        }
-
-        async function loadMessages() {
-            if (!activeChatSession || !activeChatSession.participantId || !currentUser) return;
-            const container = document.getElementById('chat-messages-container');
-            if (!container) return;
-
-            try {
-                const { data, error } = await window.supabase
-                    .from('messages')
-                    .select('*')
-                    .eq('post_id', activeChatSession.postId)
-                    .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${activeChatSession.participantId}),and(sender_id.eq.${activeChatSession.participantId},recipient_id.eq.${currentUser.id})`)
-                    .order('created_at', { ascending: true });
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = `<div class="text-center text-gray-400 my-auto">Esta é uma conversa isolada sobre o post: <b>${activeChatSession.postTitle}</b>. Envie a primeira mensagem!</div>`;
-                    return;
-                }
-
-                container.innerHTML = data.map(msg => {
-                    const isMe = msg.sender_id === currentUser.id;
-                    return `
-                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                            <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-[#365314] text-white rounded-br-none' : 'bg-white border border-lime-200 text-gray-800 rounded-bl-none shadow-sm'}">
-                                ${msg.content}
-                            </div>
-                            <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        </div>
-                    `;
-                }).join('');
-                container.scrollTop = container.scrollHeight;
-            } catch (err) {
-                container.xmlContent = `<div class="text-center text-red-500">Erro ao carregar mensagens.</div>`;
-            }
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input-text');
-            const content = input?.value.trim();
-            if (!content || !activeChatSession || !activeChatSession.participantId || !currentUser) return;
-
-            input.value = '';
-
-            try {
-                const { error } = await window.supabase
-                    .from('messages')
-                    .insert([{
-                        post_id: activeChatSession.postId,
-                        post_title: activeChatSession.postTitle,
-                        post_owner_id: activeChatSession.postOwnerId,
-                        sender_id: currentUser.id,
-                        sender_name: currentUser.name,
-                        recipient_id: activeChatSession.participantId,
-                        recipient_name: activeChatSession.participantName,
-                        content: content
-                    }]);
-
-                if (error) throw error;
-                loadMessages();
-            } catch (err) {
-                console.error("Erro ao enviar mensagem:", err);
-                showToast("Erro ao enviar mensagem: " + (err.message || 'Verifique sua conexão'), "error");
-            }
+        // Função simples de confirmação via pop-up do navegador para evitar cliques acidentais
+        function confirmarExclusao() {
+            return confirm("Tem certeza absoluta de que deseja excluir sua conta? Esta ação não pode ser desfeita.");
         }
     </script>
+
 </body>
 </html>
