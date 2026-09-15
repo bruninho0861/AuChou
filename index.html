@@ -197,6 +197,27 @@
         </div>
     </div>
 
+    <!-- Modal para Visualizar onde o Pet foi visto no Mapa -->
+    <div id="modal-map" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl max-w-2xl w-full p-5 shadow-2xl relative border border-lime-200">
+            <button onclick="closeModal('modal-map')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-1 shadow">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="mb-3">
+                <h3 class="font-bold text-gray-900 text-sm flex items-center">
+                    <i class="fa-solid fa-map-location-dot text-lime-700 mr-2"></i> Localização do Pet / Região de Vistoria
+                </h3>
+                <p id="modal-map-subtitle" class="text-xs text-gray-500 mt-0.5">Itapetininga - SP e arredores</p>
+            </div>
+            <div class="rounded-lg overflow-hidden border border-lime-200 shadow-inner w-full h-[400px]">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117003.81596214893!2d-48.029943!3d-23.5910868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5cc70ba456a65%3A0x770be09241987369!2sItapetininga%2C%20SP!5e0!3m2!1spt-BR!2sbr!4v1789481421575!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="closeModal('modal-map')" class="px-4 py-2 bg-[#365314] text-white rounded text-xs font-medium hover:bg-lime-900 transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Criar/Editar Alerta com Google Maps Incorporado -->
     <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8 border border-lime-200">
@@ -566,6 +587,16 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
+        // Função para abrir o mapa interativo detalhado de onde o pet foi visto
+        function openMapModal(locationText) {
+            const modal = document.getElementById('modal-map');
+            const subtitle = document.getElementById('modal-map-subtitle');
+            if (subtitle) {
+                subtitle.innerText = `Região informada: ${locationText}`;
+            }
+            modal.classList.remove('hidden');
+        }
+
         async function handleSupabasePasswordReset(event) {
             event.preventDefault();
             const email = document.getElementById('forgot-email').value.trim();
@@ -857,11 +888,18 @@
                         ${post.petName ? `<p class="font-bold text-gray-800 mb-1">Nome do Pet: ${post.petName}</p>` : ''}
                         <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
                     </div>
-                    <div class="p-3.5 border-t border-gray-100 flex justify-between items-center bg-[#f9faf6]">
+                    <div class="p-3.5 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 bg-[#f9faf6]">
                         <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
-                        <button onclick="openChatForPost('${post.id}', '${postTitleText.replace(/'/g, "\\'")}', '${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
-                            <i class="fa-solid fa-comment mr-1.5"></i> ${isOwner ? 'Ver Conversas Deste Post' : 'Conversar Sobre Este Post'}
-                        </button>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="openMapModal('${post.location.replace(/'/g, "\\'")}')" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-amber-600 transition shadow">
+                                <i class="fa-solid fa-map-pin mr-1"></i> Ver no Mapa
+                            </button>
+                            
+                            <button onclick="openChatForPost('${post.id}', '${postTitleText.replace(/'/g, "\\'")}', '${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
+                                <i class="fa-solid fa-comment mr-1.5"></i> ${isOwner ? 'Ver Conversas' : 'Conversar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1060,7 +1098,6 @@
             }
 
             try {
-                // Remove os posts do usuário antes de encerrar
                 await window.supabase.from('posts').delete().eq('user_id', currentUser.id);
                 
                 showToast("Conta e dados removidos com sucesso.", "success");
