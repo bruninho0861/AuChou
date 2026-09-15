@@ -944,8 +944,6 @@
                 return;
             }
 
-            // Se o usuário logado é o dono do post, definimos participantId como null inicialmente para ele ver quem comentou
-            // Se o usuário logado NÃO é o dono do post, ele conversa diretamente com o dono (postOwnerId)
             const participantId = (currentUser.id === postOwnerId) ? null : postOwnerId;
             const participantName = (currentUser.id === postOwnerId) ? null : postOwnerName;
 
@@ -1107,7 +1105,6 @@
             clearChatNotificationPulse();
             const appView = document.getElementById('app-view');
             
-            // Se nenhuma sessão de chat específica de post está aberta, mostramos a lista de conversas divididas por post
             if (!activeChatSession) {
                 appView.innerHTML = `
                     <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
@@ -1124,7 +1121,6 @@
                 return;
             }
 
-            // Se o usuário logado é o dono do post, mas ainda não escolheu com qual interessado conversar, mostramos a lista de interessados naquele post específico
             const isOwner = (currentUser.id === activeChatSession.postOwnerId);
             if (isOwner && !activeChatSession.participantId) {
                 appView.innerHTML = `
@@ -1148,7 +1144,6 @@
                 return;
             }
 
-            // Chat Ativo Isolado para este Post e Participante
             appView.innerHTML = `
                 <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
                     <div class="p-3 border-b bg-[#f9faf6] flex items-center justify-between">
@@ -1185,7 +1180,6 @@
             if (!inboxContainer) return;
 
             try {
-                // Buscamos todas as mensagens envolvendo o usuário logado
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
@@ -1199,7 +1193,6 @@
                     return;
                 }
 
-                // Agrupamos por (post_id + o outro usuário envolvido) para garantir isolamento perfeito
                 const conversationsMap = new Map();
 
                 for (const msg of data) {
@@ -1211,7 +1204,6 @@
                     const sessionKey = `${postId}_${otherUserId}`;
 
                     if (!conversationsMap.has(sessionKey)) {
-                        // Precisamos buscar o título do post se post_id existir
                         let postTitle = msg.post_title || 'Alerta de Pet';
                         if (msg.post_id && !msg.post_title) {
                             const { data: postData } = await window.supabase.from('posts').select('category, breed, pet_name').eq('id', msg.post_id).single();
@@ -1220,7 +1212,6 @@
                             }
                         }
 
-                        // Verificamos quem é o dono do post
                         let postOwnerId = msg.post_owner_id;
                         if (msg.post_id && !postOwnerId) {
                             const { data: postData } = await window.supabase.from('posts').select('user_id').eq('id', msg.post_id).single();
@@ -1268,7 +1259,6 @@
             if (!container) return;
 
             try {
-                // Buscamos todas as mensagens associadas a este post específico
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
@@ -1329,7 +1319,6 @@
             if (!container) return;
 
             try {
-                // Buscamos apenas as mensagens que pertencem estritamente a este post E entre o usuário logado e o participante selecionado
                 const { data, error } = await window.supabase
                     .from('messages')
                     .select('*')
@@ -1351,7 +1340,7 @@
                             <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-[#365314] text-white rounded-br-none' : 'bg-white border border-lime-200 text-gray-800 rounded-bl-none shadow-sm'}">
                                 ${msg.content}
                             </div>
-                            <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span class="test-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
                     `;
                 }).join('');
@@ -1369,6 +1358,7 @@
             input.value = '';
 
             try {
+                // Inserção com payload seguro que inclui post_id e post_owner_id
                 const { error } = await window.supabase
                     .from('messages')
                     .insert([{
@@ -1385,7 +1375,8 @@
                 if (error) throw error;
                 loadMessages();
             } catch (err) {
-                showToast("Erro ao enviar mensagem.", "error");
+                console.error("Erro ao enviar mensagem:", err);
+                showToast("Erro ao enviar mensagem: " + (err.message || 'Verifique sua conexão'), "error");
             }
         }
     </script>
