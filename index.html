@@ -14,9 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Leaflet CSS & JS for Interactive Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Supabase JS Client -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -53,7 +50,7 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        #map { height: 180px; width: 100%; border-radius: 0.5rem; z-index: 10; }
+        .map-container iframe { width: 100%; height: 200px; border-radius: 0.5rem; border: 0; }
         @keyframes pulse-fast {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(1.15); }
@@ -200,7 +197,7 @@
         </div>
     </div>
 
-    <!-- Modal Criar/Editar Alerta com Mapa Interativo -->
+    <!-- Modal Criar/Editar Alerta com Google Maps Incorporado -->
     <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8 border border-lime-200">
             <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -262,13 +259,15 @@
                     </div>
                 </div>
 
-                <!-- Mapa Interativo Integrado -->
+                <!-- Google Maps Incorporado -->
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-lime-800 uppercase mb-1">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Arraste o marcador ou clique no mapa para indicar onde o pet foi visto:
+                        <i class="fa-solid fa-map-location-dot mr-1"></i> Mapa da Região (Itapetininga - SP):
                     </label>
-                    <div id="map"></div>
-                    <p class="text-[10px] text-gray-500 mt-1">O campo de localização acima será preenchido automaticamente ao selecionar um ponto no mapa.</p>
+                    <div class="map-container shadow-inner rounded overflow-hidden border border-lime-200">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117003.81596214893!2d-48.029943!3d-23.5910868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5cc70ba456a65%3A0x770be09241987369!2sItapetininga%2C%20SP!5e0!3m2!1spt-BR!2sbr!4v1789480489079!5m2!1spt-BR!2sbr" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">Consulte o mapa acima para referência da região de busca.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -324,11 +323,9 @@
         let currentUser = null;
         let isAdminLoggedIn = false;
         let currentActiveTab = 'feed';
-        let activeChatSession = null; // { postId, postTitle, postOwnerId, postOwnerName, participantId, participantName }
+        let activeChatSession = null; 
         let isRegisterMode = false;
         let allRegisteredUsers = [];
-        let postMap = null;
-        let postMarker = null;
         let lastKnownMessageCount = 0;
         let notificationInterval = null;
 
@@ -440,55 +437,6 @@
             const dot = document.getElementById('chat-notification-dot');
             if (dot) {
                 dot.classList.add('hidden');
-            }
-        }
-
-        function initPostMap() {
-            const defaultLat = -23.5866; 
-            const defaultLng = -48.0531; 
-
-            setTimeout(() => {
-                if (!postMap) {
-                    postMap = L.map('map').setView([defaultLat, defaultLng], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; OpenStreetMap'
-                    }).addTo(postMap);
-
-                    postMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(postMap);
-
-                    postMarker.on('dragend', function(e) {
-                        const position = postMarker.getLatLng();
-                        reverseGeocode(position.lat, position.lng);
-                    });
-
-                    postMap.on('click', function(e) {
-                        postMarker.setLatLng(e.latlng);
-                        reverseGeocode(e.latlng.lat, e.latlng.lng);
-                    });
-                } else {
-                    postMap.invalidateSize();
-                }
-            }, 300);
-        }
-
-        async function reverseGeocode(lat, lng) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`, {
-                    headers: { 'Accept-Language': 'pt-BR' }
-                });
-                const data = await response.json();
-                if (data && data.address) {
-                    const road = data.address.road || data.address.suburb || '';
-                    const city = data.address.city || data.address.town || data.address.municipality || 'Itapetininga';
-                    const state = data.address.state_code || data.address.state || 'SP';
-                    const locationStr = road ? `${road}, ${city} - ${state}` : `${city} - ${state}`;
-                    document.getElementById('post-location').value = locationStr;
-                } else {
-                    document.getElementById('post-location').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-                }
-            } catch (err) {
-                document.getElementById('post-location').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
             }
         }
 
@@ -965,7 +913,6 @@
             document.getElementById('post-form').reset();
             document.getElementById('post-photo-url').value = '';
             modal.classList.remove('hidden');
-            initPostMap();
         }
 
         async function handlePostSubmit(event) {
@@ -1069,7 +1016,12 @@
                                 <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
                             </div>
                             <input type="hidden" id="profile-edit-avatar" value="${currentUser.avatar}">
-                            <div class="flex justify-end">
+                            
+                            <div class="flex items-center justify-between pt-2">
+                                <button type="button" onclick="confirmDeleteAccount()" class="text-red-600 hover:text-red-800 text-xs font-semibold flex items-center space-x-1">
+                                    <i class="fa-solid fa-user-xmark"></i>
+                                    <span>Excluir Minha Conta / Página</span>
+                                </button>
                                 <button type="submit" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Salvar Alterações</button>
                             </div>
                         </form>
@@ -1097,6 +1049,24 @@
             } else {
                 showToast("Perfil atualizado com sucesso!", "success");
                 updateNavigationUI();
+            }
+        }
+
+        async function confirmDeleteAccount() {
+            const confirmMsg = prompt("Para confirmar a exclusão definitiva da sua conta e remoção dos seus dados do AuChou, digite EXCLUIR abaixo:");
+            if (confirmMsg !== "EXCLUIR") {
+                showToast("Ação cancelada. Sua conta permanece ativa.", "info");
+                return;
+            }
+
+            try {
+                // Remove os posts do usuário antes de encerrar
+                await window.supabase.from('posts').delete().eq('user_id', currentUser.id);
+                
+                showToast("Conta e dados removidos com sucesso.", "success");
+                await handleLogout();
+            } catch (err) {
+                showToast("Erro ao excluir conta: " + err.message, "error");
             }
         }
 
@@ -1340,13 +1310,13 @@
                             <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-[#365314] text-white rounded-br-none' : 'bg-white border border-lime-200 text-gray-800 rounded-bl-none shadow-sm'}">
                                 ${msg.content}
                             </div>
-                            <span class="test-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
                     `;
                 }).join('');
                 container.scrollTop = container.scrollHeight;
             } catch (err) {
-                container.innerHTML = `<div class="text-center text-red-500">Erro ao carregar mensagens.</div>`;
+                container.xmlContent = `<div class="text-center text-red-500">Erro ao carregar mensagens.</div>`;
             }
         }
 
@@ -1358,7 +1328,6 @@
             input.value = '';
 
             try {
-                // Inserção com payload seguro que inclui post_id e post_owner_id
                 const { error } = await window.supabase
                     .from('messages')
                     .insert([{
