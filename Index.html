@@ -1,1 +1,979 @@
-fd
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuChou — Rede Social de Pets Perdidos e Achados</title>
+    <!-- Configuração do PWA (Aplicativo) -->
+    <meta name="theme-color" content="#365314">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f4fbf4',
+                            100: '#e2f7e2',
+                            500: '#65a30d',
+                            600: '#4d7c0f',
+                            700: '#3f6212'
+                        },
+                        secondary: '#166534',
+                        accent: '#eab308',
+                        siteBg: '#f4f6f0',
+                        headerBg: '#365314'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f6f0; color: #1c1917; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .map-container iframe { width: 100%; height: 200px; border-radius: 0.5rem; border: 0; }
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.15); }
+        }
+        .animate-pulse-icon {
+            animation: pulse-fast 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <header class="bg-[#365314] text-white shadow-md sticky top-0 z-45">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('feed')">
+                <div class="w-8 h-8 rounded-full bg-[#eab308] text-[#365314] flex items-center justify-center font-black shadow">
+                    <i class="fa-solid fa-paw"></i>
+                </div>
+                <h1 class="text-xl font-black tracking-tight text-white">AuChou <span class="text-xs font-normal text-[#eab308]">Pets</span></h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center space-x-1 text-xs font-semibold">
+                <button onclick="switchTab('feed')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Início</button>
+                <button onclick="switchTab('profile')" class="px-3 py-1.5 hover:bg-white/10 rounded transition">Meu Perfil</button>
+                <button onclick="switchTab('chats')" id="nav-chat-btn" class="px-3 py-1.5 hover:bg-white/10 rounded transition relative flex items-center space-x-1.5">
+                    <span>Mensagens por Post</span>
+                    <span id="chat-notification-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 hidden animate-pulse-icon"></span>
+                </button>
+                <button onclick="openPostModal()" class="px-3 py-1.5 bg-[#eab308] text-[#365314] font-bold rounded shadow hover:bg-yellow-400 transition">Novo Alerta</button>
+            </div>
+
+            <!-- Search Header -->
+            <div class="flex items-center space-x-2">
+                <div class="relative">
+                    <input type="text" id="global-search-input" oninput="renderFeed()" placeholder="pesquisar pets..." class="pl-3 pr-8 py-1.5 bg-white text-gray-800 rounded text-xs focus:outline-none w-36 sm:w-48 shadow-inner">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 pointer-events-none">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-6">
+        <!-- Visitor Banner if not logged in -->
+        <div id="visitor-banner" class="hidden bg-white rounded-xl p-6 text-gray-800 mb-6 shadow-sm border border-lime-200 flex flex-col md:flex-row items-center justify-between">
+            <div class="mb-4 md:mb-0">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Bem-vindo à comunidade AuChou Pets!</h2>
+                <p class="text-gray-600 text-xs">Cadastre-se rapidamente com um apelido ou nome para criar seu perfil e interagir nos posts.</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="openAuthModal('login')" class="bg-[#365314] text-white px-5 py-2 rounded-lg font-medium text-xs shadow hover:bg-lime-900 transition">Entrar</button>
+                <button onclick="openAuthModal('register')" class="bg-gray-100 text-gray-800 px-5 py-2 rounded-lg font-medium text-xs border border-gray-300 hover:bg-gray-200 transition">Criar Conta Fictícia</button>
+            </div>
+        </div>
+
+        <div id="app-view">
+            <!-- Feed or active tab content gets injected here -->
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12 py-4 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>&copy; 2026 AuChou Pet. Modo Local Integrado e Seguro.</p>
+        </div>
+    </footer>
+
+    <!-- Auth Modal (Fictitious Account) -->
+    <div id="modal-auth" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-lime-200">
+            <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 rounded-full bg-lime-100 text-[#365314] flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                    <i class="fa-solid fa-paw"></i>
+                </div>
+                <h3 id="auth-modal-title" class="text-lg font-bold text-gray-900">Entrar no AuChou</h3>
+                <p id="auth-modal-subtitle" class="text-xs text-gray-500 mt-1">Acesso instantâneo com usuário fictício</p>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                <div id="auth-name-field" class="mb-3 hidden">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Seu Nome / Apelido</label>
+                    <input type="text" id="auth-name" placeholder="Ex: Mari Souza" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome de Usuário ou E-mail Fictício</label>
+                    <input type="text" id="auth-email" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" placeholder="ex: mariana ou mari@email.com">
+                </div>
+                
+                <div id="auth-error-msg" class="mb-3 p-2.5 bg-red-50 text-red-700 text-xs rounded hidden"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-[#365314] text-white font-medium py-2 rounded text-xs hover:bg-lime-900 transition shadow">Entrar</button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <p id="auth-switch-text" class="text-xs text-gray-600">
+                    Não tem uma conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Criar conta fictícia</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="modal-map" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl max-w-2xl w-full p-5 shadow-2xl relative border border-lime-200">
+            <button onclick="closeModal('modal-map')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-1 shadow">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="mb-3">
+                <h3 class="font-bold text-gray-900 text-sm flex items-center">
+                    <i class="fa-solid fa-map-location-dot text-lime-700 mr-2"></i> Localização do Pet / Região
+                </h3>
+                <p id="modal-map-subtitle" class="text-xs text-gray-500 mt-0.5">Itapetininga - SP e arredores</p>
+            </div>
+            <div class="rounded-lg overflow-hidden border border-lime-200 shadow-inner w-full h-[400px]">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117003.81596214893!2d-48.029943!3d-23.5910868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5cc70ba456a65%3A0x770be09241987369!2sItapetininga%2C%20SP!5e0!3m2!1spt-BR!2sbr!4v1789481421575!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="closeModal('modal-map')" class="px-4 py-2 bg-[#365314] text-white rounded text-xs font-medium hover:bg-lime-900 transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Modal -->
+    <div id="modal-post" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl relative my-8 border border-lime-200">
+            <button onclick="closeModal('modal-post')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900 mb-4">Criar Alerta de Pet</h3>
+
+            <form id="post-form" onsubmit="handlePostSubmit(event)">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Categoria / Tipo</label>
+                        <select id="post-category" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
+                            <option value="Cão Perdido">Cão Perdido</option>
+                            <option value="Cão Achado">Cão Achado</option>
+                            <option value="Gato Perdido">Gato Perdido</option>
+                            <option value="Gato Achado">Gato Achado</option>
+                            <option value="Outros Pets - Perdido">Outros Pets - Perdido</option>
+                            <option value="Outros Pets - Achado">Outros Pets - Achado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome do Pet (opcional)</label>
+                        <input type="text" id="post-pet-name" placeholder="Ex: Mel, Thor" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Espécie</label>
+                        <select id="post-species" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
+                            <option value="Cão">Cão</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Raça</label>
+                        <input type="text" id="post-breed" required placeholder="Ex: Poodle, SRD" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Porte</label>
+                        <select id="post-size" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:border-[#65a30d]">
+                            <option value="Pequeno">Pequeno</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Grande">Grande</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Cor Predominante</label>
+                        <input type="text" id="post-color" required placeholder="Ex: Marrom e Branco" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Local (Bairro/Cidade)</label>
+                        <input type="text" id="post-location" required placeholder="Ex: Centro, Itapetininga - SP" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Foto do Animal</label>
+                    <input type="file" id="post-photo-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-lime-100 file:text-lime-800 hover:file:bg-lime-200" onchange="handleImageResize(event, 800, 'post-photo-url')">
+                    <input type="hidden" id="post-photo-url">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Descrição e Detalhes</label>
+                    <textarea id="post-desc" rows="3" required placeholder="Coleira azul, mancha na orelha direita..." class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('modal-post')" class="px-4 py-2 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-[#365314] text-white font-medium rounded text-xs hover:bg-lime-900 transition shadow">Publicar Alerta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Profile Modal -->
+    <div id="modal-view-profile" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative text-center border border-lime-200">
+            <button onclick="closeModal('modal-view-profile')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="view-profile-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentActiveTab = 'feed';
+        let activeChatSession = null; 
+        let isRegisterMode = false;
+
+        // Dados iniciais salvos no localStorage (ou padrão)
+        let localPosts = JSON.parse(localStorage.getItem('auchou_posts')) || [
+            {
+                id: 'mock-1',
+                userId: 'user-1',
+                userName: 'Mariana Souza',
+                userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+                petName: 'Mel',
+                category: 'Cão Perdido',
+                species: 'Cão',
+                breed: 'Poodle',
+                size: 'Pequeno',
+                color: 'Branco',
+                location: 'Centro, Itapetininga - SP',
+                status: 'Procurando',
+                photo: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600',
+                description: 'Usava coleira rosa com plaquinha de identificação. Muito dócil e assustada.',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'mock-2',
+                userId: 'user-2',
+                userName: 'Carlos Alberto',
+                userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+                petName: 'Chico',
+                category: 'Gato Achado',
+                species: 'Gato',
+                breed: 'SRD (Persa Mix)',
+                size: 'Médio',
+                color: 'Cinza Tigrado',
+                location: 'Vila Progresso, Itapetininga - SP',
+                status: 'Procurando',
+                photo: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600',
+                description: 'Encontrado no quintal de casa miando muito. Olhos verdes marcantes.',
+                createdAt: new Date(Date.now() - 3600000).toISOString()
+            }
+        ];
+
+        let localMessages = JSON.parse(localStorage.getItem('auchou_messages')) || [];
+        let localUsers = JSON.parse(localStorage.getItem('auchou_users')) || [
+            { id: 'user-1', name: 'Mariana Souza', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', region: 'Itapetininga - SP' },
+            { id: 'user-2', name: 'Carlos Alberto', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', region: 'Itapetininga - SP' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('auchou_current_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+            updateNavigationUI();
+            renderFeed();
+        });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('auchou_posts', JSON.stringify(localPosts));
+            localStorage.setItem('auchou_messages', JSON.stringify(localMessages));
+            localStorage.setItem('auchou_users', JSON.stringify(localUsers));
+            if (currentUser) {
+                localStorage.setItem('auchou_current_user', JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem('auchou_current_user');
+            }
+        }
+
+        function updateNavigationUI() {
+            const visitorBanner = document.getElementById('visitor-banner');
+            if (currentUser) {
+                if (visitorBanner) visitorBanner.classList.add('hidden');
+            } else {
+                if (visitorBanner) visitorBanner.classList.remove('hidden');
+            }
+        }
+
+        function openAuthModal(mode) {
+            const modal = document.getElementById('modal-auth');
+            const titleEl = document.getElementById('auth-modal-title');
+            const subtitleEl = document.getElementById('auth-modal-subtitle');
+            const nameField = document.getElementById('auth-name-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchText = document.getElementById('auth-switch-text');
+            const errorEl = document.getElementById('auth-error-msg');
+
+            errorEl.classList.add('hidden');
+            document.getElementById('auth-form').reset();
+
+            if (mode === 'register') {
+                isRegisterMode = true;
+                titleEl.innerText = 'Criar Conta Fictícia';
+                subtitleEl.innerText = 'Digite seu nome para entrar na rede';
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = 'Cadastrar e Entrar';
+                switchText.innerHTML = `Já tem conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Entrar</a>`;
+            } else {
+                isRegisterMode = false;
+                titleEl.innerText = 'Entrar na Conta';
+                subtitleEl.innerText = 'Informe seu nome de usuário cadastrado';
+                nameField.classList.add('hidden');
+                submitBtn.innerText = 'Entrar';
+                switchText.innerHTML = `Não tem conta? <a href="#" onclick="toggleAuthMode(); return false;" class="text-lime-700 font-semibold hover:underline">Criar conta fictícia</a>`;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function toggleAuthMode() {
+            openAuthModal(isRegisterMode ? 'login' : 'register');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function openMapModal(locationText) {
+            const modal = document.getElementById('modal-map');
+            const subtitle = document.getElementById('modal-map-subtitle');
+            if (subtitle) subtitle.innerText = `Região informada: ${locationText}`;
+            modal.classList.remove('hidden');
+        }
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            const identifier = document.getElementById('auth-email').value.trim().toLowerCase();
+            const errorEl = document.getElementById('auth-error-msg');
+            errorEl.classList.add('hidden');
+
+            if (isRegisterMode) {
+                const name = document.getElementById('auth-name').value.trim();
+                if (!name) {
+                    errorEl.innerText = 'Por favor, informe seu nome completo.';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                const newUserId = 'user-' + Date.now();
+                currentUser = {
+                    id: newUserId,
+                    name: name,
+                    email: identifier,
+                    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+                    region: 'Itapetininga - SP'
+                };
+
+                localUsers.push(currentUser);
+                saveToLocalStorage();
+                closeModal('modal-auth');
+                updateNavigationUI();
+                renderFeed();
+                showToast('Conta criada com sucesso!', 'success');
+            } else {
+                const foundUser = localUsers.find(u => u.name.toLowerCase() === identifier || u.id === identifier || (u.email && u.email === identifier));
+                if (foundUser) {
+                    currentUser = foundUser;
+                    saveToLocalStorage();
+                    closeModal('modal-auth');
+                    updateNavigationUI();
+                    renderFeed();
+                    showToast(`Bem-vindo de volta, ${currentUser.name}!`, 'success');
+                } else {
+                    const newUserId = 'user-' + Date.now();
+                    currentUser = {
+                        id: newUserId,
+                        name: document.getElementById('auth-email').value.trim(),
+                        email: identifier,
+                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+                        region: 'Itapetininga - SP'
+                    };
+                    localUsers.push(currentUser);
+                    saveToLocalStorage();
+                    closeModal('modal-auth');
+                    updateNavigationUI();
+                    renderFeed();
+                    showToast('Sessão iniciada com sucesso!', 'success');
+                }
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            saveToLocalStorage();
+            updateNavigationUI();
+            renderFeed();
+            showToast('Sessão encerrada.', 'info');
+        }
+
+        function showToast(message, type = 'success') {
+            const existingToast = document.getElementById('auchou-toast');
+            if (existingToast) existingToast.remove();
+
+            const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-[#365314]' };
+            const toast = document.createElement('div');
+            toast.id = 'auchou-toast';
+            toast.className = `fixed bottom-5 right-5 z-50 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center space-x-2 text-xs font-medium ${colors[type] || colors.success} transition-all duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-sm"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        function handleImageResize(event, maxDimension, targetInputId, previewImgId = null) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxDimension) {
+                            height = Math.round((height * maxDimension) / width);
+                            width = maxDimension;
+                        }
+                    } else {
+                        if (height > maxDimension) {
+                            width = Math.round((width * maxDimension) / height);
+                            height = maxDimension;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    document.getElementById(targetInputId).value = compressedDataUrl;
+
+                    if (previewImgId) {
+                        const previewEl = document.getElementById(previewImgId);
+                        if (previewEl) previewEl.src = compressedDataUrl;
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderFeed() {
+            currentActiveTab = 'feed';
+            const appView = document.getElementById('app-view');
+            
+            const searchKeyword = document.getElementById('global-search-input')?.value?.toLowerCase() || '';
+            const filteredPosts = localPosts.filter(post => {
+                if (searchKeyword) {
+                    const matchText = `${post.breed} ${post.petName || ''} ${post.location} ${post.description} ${post.category}`.toLowerCase();
+                    if (!matchText.includes(searchKeyword)) return false;
+                }
+                return true;
+            });
+
+            const myAvatar = currentUser ? currentUser.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+            const myName = currentUser ? currentUser.name : 'Visitante';
+            const myRegion = currentUser ? currentUser.region : 'Itapetininga - SP';
+
+            const sidebarUsers = localUsers.slice(0, 9);
+
+            appView.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-start">
+                    <!-- Esquerda: Perfil -->
+                    <div class="md:col-span-1 space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 text-center">
+                            <img src="${myAvatar}" alt="${myName}" class="w-24 h-24 rounded-full mx-auto object-cover mb-2 border-2 border-lime-500 shadow-sm">
+                            <h3 class="font-bold text-xs text-lime-800">${myName}</h3>
+                            <p class="text-[10px] text-gray-500 mb-3"><i class="fa-solid fa-location-dot mr-1"></i>${myRegion}</p>
+                            
+                            <div class="text-left text-[11px] space-y-2 border-t border-gray-100 pt-3 text-gray-700 font-medium">
+                                <p><a href="#" onclick="switchTab('profile'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-user mr-2 w-4 text-center"></i> meu perfil</a></p>
+                                <p><a href="#" onclick="switchTab('chats'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-comments mr-2 w-4 text-center"></i> mensagens por post</a></p>
+                                <p><a href="#" onclick="openPostModal(); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-bullhorn mr-2 w-4 text-center"></i> criar alerta</a></p>
+                                ${currentUser ? `<p><a href="#" onclick="handleLogout(); return false;" class="text-red-600 hover:underline flex items-center"><i class="fa-solid fa-right-from-bracket mr-2 w-4 text-center"></i> sair</a></p>` : `<p><a href="#" onclick="openAuthModal('login'); return false;" class="text-lime-700 hover:underline flex items-center"><i class="fa-solid fa-right-to-bracket mr-2 w-4 text-center"></i> entrar</a></p>`}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Centro: Feed -->
+                    <div class="md:col-span-2 lg:col-span-3 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-800">Alertas Recentes (${filteredPosts.length})</span>
+                            <button onclick="openPostModal()" class="bg-[#365314] text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow hover:bg-lime-900">Novo Alerta</button>
+                        </div>
+                        <div class="space-y-4">
+                            ${filteredPosts.length === 0 ? `<div class="bg-white rounded-xl p-8 text-center border border-lime-200"><p class="text-xs text-gray-500">Nenhum pet encontrado.</p></div>` : filteredPosts.map(post => renderPostCard(post)).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Direita: Membros -->
+                    <div class="md:col-span-1 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-lime-200">
+                            <h4 class="font-bold text-xs text-gray-800 mb-3 border-b pb-1.5">Membros (${localUsers.length})</h4>
+                            <div class="grid grid-cols-3 gap-2.5">
+                                ${sidebarUsers.map(u => `
+                                    <div class="text-center cursor-pointer group" onclick="viewUserProfileCard('${u.id}', '${u.name}', '${u.avatar}', '${u.region}')">
+                                        <div class="w-16 h-16 mx-auto rounded-lg overflow-hidden border border-lime-300 bg-gray-100 shadow-sm">
+                                            <img src="${u.avatar}" alt="${u.name}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                                        </div>
+                                        <p class="text-[10px] text-lime-800 truncate mt-1 group-hover:underline font-semibold">${u.name.split(' ')[0]}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewUserProfileCard(userId, userName, userAvatar, userRegion) {
+            const modal = document.getElementById('modal-view-profile');
+            const content = document.getElementById('view-profile-content');
+            content.innerHTML = `
+                <img src="${userAvatar}" alt="${userName}" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-lime-500 shadow-md mb-3">
+                <h3 class="font-bold text-base text-gray-900">${userName}</h3>
+                <p class="text-xs text-gray-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${userRegion || 'Itapetininga - SP'}</p>
+                <p class="text-xs text-gray-600 mb-4 bg-lime-50 p-2.5 rounded border border-lime-100">Membro da rede AuChou Pets.</p>
+                <button onclick="closeModal('modal-view-profile')" class="w-full py-2 bg-[#365314] text-white rounded text-xs font-medium hover:bg-lime-900 transition">Fechar</button>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function renderPostCard(post) {
+            let deleteButtonHtml = '';
+            const isOwner = currentUser && (post.userId === currentUser.id);
+
+            if (isOwner) {
+                deleteButtonHtml = `
+                    <button onclick="handleDeletePost('${post.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-2.5 py-1 rounded text-[11px] font-medium transition flex items-center space-x-1">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Excluir</span>
+                    </button>
+                `;
+            }
+
+            const postTitleText = post.petName ? `${post.category}: ${post.petName} (${post.breed})` : `${post.category} - ${post.breed}`;
+
+            return `
+                <div class="bg-white rounded-xl shadow-sm border border-lime-200 overflow-hidden text-xs">
+                    <div class="p-3.5 flex items-center justify-between border-b border-gray-100 bg-[#f9faf6]">
+                        <div class="flex items-center space-x-2.5">
+                            <img src="${post.userAvatar}" alt="${post.userName}" class="w-9 h-9 rounded-full object-cover border border-lime-300">
+                            <div>
+                                <h4 class="font-bold text-gray-900">${post.userName}</h4>
+                                <p class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-lime-100 text-lime-800">${post.category}</span>
+                            ${deleteButtonHtml}
+                        </div>
+                    </div>
+                    <div class="relative bg-gray-100 max-h-80 overflow-hidden">
+                        <img src="${post.photo}" alt="${post.breed}" class="w-full h-full object-cover max-h-80">
+                    </div>
+                    <div class="p-4">
+                        ${post.petName ? `<p class="font-bold text-gray-800 mb-1">Nome do Pet: ${post.petName}</p>` : ''}
+                        <p class="text-gray-800 mb-3 leading-relaxed">${post.description}</p>
+                    </div>
+                    <div class="p-3.5 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 bg-[#f9faf6]">
+                        <span class="text-[10px] text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${post.location}</span>
+                        <div class="flex space-x-2">
+                            <button onclick="openMapModal('${post.location.replace(/'/g, "\\'")}')" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-amber-600 transition shadow">
+                                <i class="fa-solid fa-map-pin mr-1"></i> Ver no Mapa
+                            </button>
+                            <button onclick="openChatForPost('${post.id}', '${postTitleText.replace(/'/g, "\\'")}', '${post.userId}', '${post.userName}')" class="bg-[#365314] text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-lime-900 transition shadow">
+                                <i class="fa-solid fa-comment mr-1.5"></i> ${isOwner ? 'Ver Conversas' : 'Conversar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleDeletePost(postId) {
+            if (!currentUser) return;
+            if (!confirm("Deseja excluir esta publicação?")) return;
+
+            localPosts = localPosts.filter(p => p.id !== postId);
+            saveToLocalStorage();
+            renderFeed();
+            showToast("Publicação excluída com sucesso!", "success");
+        }
+
+        function openPostModal() {
+            if (!currentUser) { openAuthModal('login'); return; }
+            document.getElementById('post-form').reset();
+            document.getElementById('post-photo-url').value = '';
+            document.getElementById('modal-post').classList.remove('hidden');
+        }
+
+        function handlePostSubmit(event) {
+            event.preventDefault();
+            const category = document.getElementById('post-category').value;
+            const pet_name = document.getElementById('post-pet-name').value.trim();
+            const breed = document.getElementById('post-breed').value.trim();
+            const size = document.getElementById('post-size').value;
+            const color = document.getElementById('post-color').value.trim();
+            const location = document.getElementById('post-location').value.trim();
+            let photo = document.getElementById('post-photo-url').value.trim();
+            const description = document.getElementById('post-desc').value.trim();
+
+            if (!photo) {
+                photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600';
+            }
+
+            const newPost = {
+                id: 'post-' + Date.now(),
+                userId: currentUser.id,
+                userName: currentUser.name,
+                userAvatar: currentUser.avatar,
+                petName: pet_name,
+                category: category,
+                species: document.getElementById('post-species').value,
+                breed: breed,
+                size: size,
+                color: color,
+                location: location,
+                status: 'Procurando',
+                photo: photo,
+                description: description,
+                createdAt: new Date().toISOString()
+            };
+
+            localPosts.unshift(newPost);
+            saveToLocalStorage();
+            closeModal('modal-post');
+            renderFeed();
+            showToast('Alerta publicado com sucesso!', 'success');
+        }
+
+        function switchTab(tab) {
+            currentActiveTab = tab;
+            if (tab === 'feed') renderFeed();
+            else if (tab === 'profile') renderProfileView();
+            else if (tab === 'chats') renderChatView();
+        }
+
+        function renderProfileView() {
+            if (!currentUser) { openAuthModal('login'); return; }
+            const appView = document.getElementById('app-view');
+            appView.innerHTML = `
+                <div class="max-w-xl mx-auto space-y-4 text-xs">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-lime-200">
+                        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
+                            <img src="${currentUser.avatar}" class="w-24 h-24 rounded-full object-cover border-4 border-lime-500 shadow-md">
+                            <div class="text-center sm:text-left">
+                                <h2 class="font-bold text-base text-gray-900">${currentUser.name}</h2>
+                                <p class="text-gray-500">ID: ${currentUser.id}</p>
+                                <p class="text-gray-600 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${currentUser.region || 'Itapetininga - SP'}</p>
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleProfileUpdate(event)" class="space-y-3 border-t pt-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nome / Apelido</label>
+                                <input type="text" id="profile-edit-name" value="${currentUser.name}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Região / Cidade</label>
+                                <input type="text" id="profile-edit-region" value="${currentUser.region || 'Itapetininga - SP'}" required class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]">
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Salvar Alterações</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleProfileUpdate(event) {
+            event.preventDefault();
+            currentUser.name = document.getElementById('profile-edit-name').value.trim();
+            currentUser.region = document.getElementById('profile-edit-region').value.trim();
+            
+            const idx = localUsers.findIndex(u => u.id === currentUser.id);
+            if (idx !== -1) localUsers[idx] = currentUser;
+
+            saveToLocalStorage();
+            showToast("Perfil atualizado com sucesso!", "success");
+            updateNavigationUI();
+        }
+
+        function openChatForPost(postId, postTitle, postOwnerId, postOwnerName) {
+            if (!currentUser) { openAuthModal('login'); return; }
+            const participantId = (currentUser.id === postOwnerId) ? null : postOwnerId;
+            const participantName = (currentUser.id === postOwnerId) ? null : postOwnerName;
+
+            activeChatSession = {
+                postId: postId,
+                postTitle: postTitle,
+                postOwnerId: postOwnerId,
+                postOwnerName: postOwnerName,
+                participantId: participantId,
+                participantName: participantName
+            };
+
+            switchTab('chats');
+        }
+
+        function renderChatView() {
+            if (!currentUser) { openAuthModal('login'); return; }
+            const appView = document.getElementById('app-view');
+
+            if (!activeChatSession) {
+                appView.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
+                            <h3 class="font-bold text-gray-900 text-xs"><i class="fa-solid fa-comments mr-2 text-lime-700"></i>Conversas Isoladas por Post</h3>
+                            <span class="text-[10px] text-gray-500">Selecione uma conversa abaixo</span>
+                        </div>
+                        <div id="chat-inbox-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs"></div>
+                    </div>
+                `;
+                loadInboxConversations();
+                return;
+            }
+
+            const isOwner = (currentUser.id === activeChatSession.postOwnerId);
+            if (isOwner && !activeChatSession.participantId) {
+                appView.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                        <div class="p-4 border-b bg-[#f9faf6] flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <button onclick="activeChatSession = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-xs">Interessados no Post:</h3>
+                                    <p class="text-[10px] text-lime-700 font-semibold truncate max-w-xs">${activeChatSession.postTitle}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="post-participants-list" class="flex-1 p-4 overflow-y-auto space-y-2 bg-[#f9faf6] text-xs"></div>
+                    </div>
+                `;
+                loadPostParticipants(activeChatSession.postId);
+                return;
+            }
+
+            appView.innerHTML = `
+                <div class="bg-white rounded-xl shadow-sm border border-lime-200 max-w-2xl mx-auto flex flex-col h-[550px]">
+                    <div class="p-3 border-b bg-[#f9faf6] flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <button onclick="activeChatSession = null; renderChatView();" class="text-gray-500 hover:text-gray-800 mr-1"><i class="fa-solid fa-arrow-left"></i></button>
+                            <div class="w-8 h-8 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-xs">
+                                ${(activeChatSession.participantName || 'Tutor').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-xs">${activeChatSession.participantName || 'Tutor'}</h3>
+                                <p class="text-[10px] text-lime-700 font-medium truncate max-w-[220px]">Post: ${activeChatSession.postTitle}</p>
+                            </div>
+                        </div>
+                        <button onclick="activeChatSession = null; renderChatView();" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fa-solid fa-xmark"></i> Fechar</button>
+                    </div>
+                    
+                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-[#f9faf6] text-xs"></div>
+
+                    <div class="p-3 border-t bg-white flex space-x-2">
+                        <input type="text" id="chat-input-text" placeholder="Escreva sua mensagem..." class="flex-1 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#65a30d]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button onclick="sendChatMessage()" class="bg-[#365314] text-white px-5 py-2 rounded text-xs font-medium hover:bg-lime-900 transition shadow">Enviar</button>
+                    </div>
+                </div>
+            `;
+            loadMessages();
+        }
+
+        function loadInboxConversations() {
+            const inboxContainer = document.getElementById('chat-inbox-list');
+            if (!inboxContainer) return;
+
+            const myMsgs = localMessages.filter(m => m.senderId === currentUser.id || m.recipientId === currentUser.id);
+            if (myMsgs.length === 0) {
+                inboxContainer.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhuma conversa encontrada. Clique em "Conversar" em qualquer alerta do feed.</div>`;
+                return;
+            }
+
+            const map = new Map();
+            myMsgs.forEach(msg => {
+                const isMe = (msg.senderId === currentUser.id);
+                const otherId = isMe ? msg.recipientId : msg.senderId;
+                const otherName = isMe ? msg.recipientName : msg.senderName;
+                const key = `${msg.postId}_${otherId}`;
+
+                if (!map.has(key)) {
+                    map.set(key, {
+                        postId: msg.postId,
+                        postTitle: msg.postTitle,
+                        postOwnerId: msg.postOwnerId,
+                        participantId: otherId,
+                        participantName: otherName,
+                        lastMessage: msg.content,
+                        time: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    });
+                }
+            });
+
+            const sessions = Array.from(map.values());
+            inboxContainer.innerHTML = sessions.map(s => `
+                <div onclick="activeChatSession = { postId: '${s.postId}', postTitle: '${s.postTitle.replace(/'/g, "\\'")}', postOwnerId: '${s.postOwnerId}', postOwnerName: '${s.participantName}', participantId: '${s.participantId}', participantName: '${s.participantName}' }; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
+                            ${s.participantName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">${s.participantName}</h4>
+                            <p class="text-[11px] text-lime-700 font-semibold truncate max-w-xs">Post: ${s.postTitle}</p>
+                            <p class="text-gray-500 truncate max-w-xs text-[10px]">${s.lastMessage}</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-gray-400">${s.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadPostParticipants(postId) {
+            const container = document.getElementById('post-participants-list');
+            if (!container) return;
+
+            const postMsgs = localMessages.filter(m => m.postId === postId);
+            const map = new Map();
+            postMsgs.forEach(msg => {
+                const otherId = msg.senderId === currentUser.id ? msg.recipientId : msg.senderId;
+                const otherName = msg.senderId === currentUser.id ? msg.recipientName : msg.senderName;
+                if (otherId && otherId !== currentUser.id && !map.has(otherId)) {
+                    map.set(otherId, {
+                        id: otherId,
+                        name: otherName || 'Interessado',
+                        lastMessage: msg.content,
+                        time: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    });
+                }
+            });
+
+            const participants = Array.from(map.values());
+            if (participants.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 py-12">Nenhum interessado conversando neste post ainda.</div>`;
+                return;
+            }
+
+            container.innerHTML = participants.map(p => `
+                <div onclick="activeChatSession.participantId = '${p.id}'; activeChatSession.participantName = '${p.name.replace(/'/g, "\\'")}'; renderChatView();" class="p-3 bg-white border border-lime-200 rounded-xl shadow-sm hover:border-lime-500 cursor-pointer flex items-center justify-between transition">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-[#365314] text-white flex items-center justify-center font-bold text-sm">
+                            ${p.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">${p.name}</h4>
+                            <p class="text-gray-500 truncate max-w-xs text-[10px]">${p.lastMessage}</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-gray-400">${p.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadMessages() {
+            if (!activeChatSession || !activeChatSession.participantId || !currentUser) return;
+            const container = document.getElementById('chat-messages-container');
+            if (!container) return;
+
+            const chatMsgs = localMessages.filter(m => 
+                m.postId === activeChatSession.postId &&
+                ((m.senderId === currentUser.id && m.recipientId === activeChatSession.participantId) ||
+                 (m.senderId === activeChatSession.participantId && m.recipientId === currentUser.id))
+            );
+
+            if (chatMsgs.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 my-auto">Conversa sobre: <b>${activeChatSession.postTitle}</b>. Envie a primeira mensagem!</div>`;
+                return;
+            }
+
+            container.innerHTML = chatMsgs.map(msg => {
+                const isMe = msg.senderId === currentUser.id;
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-[#365314] text-white rounded-br-none' : 'bg-white border border-lime-200 text-gray-800 rounded-bl-none shadow-sm'}">
+                            ${msg.content}
+                        </div>
+                        <span class="text-[9px] text-gray-400 mt-1">${new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input-text');
+            const content = input?.value.trim();
+            if (!content || !activeChatSession || !activeChatSession.participantId || !currentUser) return;
+
+            input.value = '';
+
+            const newMsg = {
+                id: 'msg-' + Date.now(),
+                postId: activeChatSession.postId,
+                postTitle: activeChatSession.postTitle,
+                postOwnerId: activeChatSession.postOwnerId,
+                senderId: currentUser.id,
+                senderName: currentUser.name,
+                recipientId: activeChatSession.participantId,
+                recipientName: activeChatSession.participantName,
+                content: content,
+                createdAt: new Date().toISOString()
+            };
+
+            localMessages.push(newMsg);
+            saveToLocalStorage();
+            loadMessages();
+        }
+    </script>
+</body>
+</html>
