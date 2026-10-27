@@ -1,532 +1,600 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bruno & Amanda — 1 Ano de Namoro ❤️</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<!-- Alpine.js CDN -->
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-tailwind.config = {
-theme: {
-extend: {
-colors: {
-romance: {
-50: '#fdf2f2',
-100: '#fbe8e8',
-200: '#f5d3d3',
-300: '#ecb0b0',
-400: '#df7e7e',
-500: '#cc4f4f',
-600: '#b43a3a',
-700: '#962e2e',
-800: '#7c2828',
-900: '#672626',
-950: '#381111',
-},
-vinho: '#4a1525',
-rosaSuave: '#f8e5e5'
-},
-fontFamily: {
-serif: ['"Playfair Display"', 'serif'],
-sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-}
-}
-}
-}
-</script>
-<style>
-.glass-card {
-background: rgba(255, 255, 255, 0.90);
-backdrop-filter: blur(12px);
-border: 1px solid rgba(223, 126, 126, 0.3);
-}
-@keyframes floatHeart {
-0% { transform: translateY(0vh) scale(0.6); opacity: 0; }
-50% { opacity: 0.8; }
-100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
-}
-.floating-heart {
-position: absolute;
-animation: floatHeart 6s linear infinite;
-bottom: -10vh;
-color: #cc4f4f;
-user-select: none;
-pointer-events: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bruno & Amanda — 1 Ano de Namoro ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        romance: {
+                            50: '#fdf2f2',
+                            100: '#fbe8e8',
+                            200: '#f5d3d3',
+                            300: '#ecb0b0',
+                            400: '#df7e7e',
+                            500: '#cc4f4f',
+                            600: '#b43a3a',
+                            700: '#962e2e',
+                            800: '#7c2828',
+                            900: '#672626',
+                            950: '#381111',
+                        },
+                        vinho: '#4a1525',
+                        rosaSuave: '#f8e5e5'
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(223, 126, 126, 0.25);
+        }
+        @keyframes floatHeart {
+            0% { transform: translateY(0vh) scale(0.6); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+        }
+        .floating-heart {
+            position: absolute;
+            animation: floatHeart 6s linear infinite;
+            bottom: -10vh;
+            color: #cc4f4f;
+            user-select: none;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-romance-950 via-vinho to-romance-900 text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-romance-500 selection:text-white" x-data="loveStoryApp()">
-<!-- Floating Background Particles / Hearts Container -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-<div class="floating-heart" style="left: 10%; animation-duration: 6s; animation-delay: 0s; font-size: 16px;">❤️</div>
-<div class="floating-heart" style="left: 30%; animation-duration: 8s; animation-delay: 2s; font-size: 22px;">❤️</div>
-<div class="floating-heart" style="left: 50%; animation-duration: 7s; animation-delay: 1s; font-size: 14px;">❤️</div>
-<div class="floating-heart" style="left: 70%; animation-duration: 9s; animation-delay: 3s; font-size: 20px;">❤️</div>
-<div class="floating-heart" style="left: 90%; animation-duration: 6s; animation-delay: 4s; font-size: 18px;">❤️</div>
-</div>
-<!-- Background Audio Player Control (Always Visible & Accessible) -->
-<div class="fixed bottom-4 right-4 z-50">
-<div class="glass-card text-slate-900 px-4 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-romance-300/40">
-<button @click="toggleMusic()" class="bg-romance-600 hover:bg-romance-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105">
-<span x-text="isPlayingMusic ? '⏸' : '▶'" class="text-lg"></span>
-</button>
-<div class="text-xs font-semibold text-slate-800 pr-1 cursor-pointer" @click="toggleMusic()">
-<p x-text="isPlayingMusic ? 'Trilha Sonora Tocando 🎵' : 'Toque para Música Romântica 🎶'"></p>
-<span class="text-[10px] text-romance-600 font-medium" x-text="isPlayingMusic ? 'Clique para pausar' : 'Clique para reproduzir'"></span>
-</div>
-</div>
-<!-- Reliable royalty-free romantic acoustic guitar stream -->
-<audio id="bgMusic" loop preload="auto">
-<source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf7f6.mp3?filename=romantic-acoustic-guitar-112135.mp3" type="audio/mpeg">
-Seu navegador não suporta áudio.
-</audio>
-</div>
-<!-- MAIN APP CONTAINER -->
-<main class="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-16">
-<!-- WELCOME SCREEN (INTRO) -->
-<section x-show="currentStep === 'intro'" x-transition class="min-h-[85vh] flex flex-col items-center justify-center text-center">
-<div class="glass-card text-slate-900 p-8 md:p-12 rounded-3xl shadow-2xl max-w-2xl mx-auto border border-romance-200 relative overflow-hidden">
-<div class="absolute -top-12 -right-12 w-32 h-32 bg-romance-200 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
-<div class="inline-block bg-romance-100 text-romance-700 text-xs uppercase tracking-widest px-3 py-1 rounded-full font-semibold mb-6">Comemoração de 1 Ano ❤️</div>
-<h1 class="font-serif text-3xl md:text-5xl font-bold text-romance-900 mb-6 leading-tight">Bruno & Amanda</h1>
-<p class="text-slate-700 text-lg md:text-xl leading-relaxed mb-8 font-light">
-“Oi, minha princesa.
 
+    <!-- Floating Background Particles / Hearts Container -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="floating-heart" style="left: 10%; animation-duration: 6s; animation-delay: 0s; font-size: 16px;">❤️</div>
+        <div class="floating-heart" style="left: 30%; animation-duration: 8s; animation-delay: 2s; font-size: 22px;">❤️</div>
+        <div class="floating-heart" style="left: 50%; animation-duration: 7s; animation-delay: 1s; font-size: 14px;">❤️</div>
+        <div class="floating-heart" style="left: 70%; animation-duration: 9s; animation-delay: 3s; font-size: 20px;">❤️</div>
+        <div class="floating-heart" style="left: 90%; animation-duration: 6s; animation-delay: 4s; font-size: 18px;">❤️</div>
+    </div>
 
-Preparei uma surpresa para você. Hoje eu quero te levar de volta ao começo da nossa história, relembrar os momentos que vivemos e mostrar o quanto cada detalhe foi importante para mim.
+    <!-- Background Audio Player Control (Always Visible & Accessible) -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <div class="glass-card text-slate-900 px-4 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-romance-300/40">
+            <button @click="toggleMusic()" class="bg-romance-600 hover:bg-romance-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105">
+                <span x-text="isPlayingMusic ? '⏸' : '▶'" class="text-lg"></span>
+            </button>
+            <div class="text-xs font-semibold text-slate-800 pr-1 cursor-pointer" @click="toggleMusic()">
+                <p x-text="isPlayingMusic ? 'Trilha Sonora Tocando 🎵' : 'Toque para Música Romântica 🎶'"></p>
+                <span class="text-[10px] text-romance-600 font-medium" x-text="isPlayingMusic ? 'Clique para pausar' : 'Clique para reproduzir'"></span>
+            </div>
+        </div>
+        <!-- Reliable royalty-free romantic acoustic guitar stream -->
+        <audio id="bgMusic" loop preload="auto">
+            <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf7f6.mp3?filename=romantic-acoustic-guitar-112135.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio.
+        </audio>
+    </div>
 
+    <!-- MAIN APP CONTAINER -->
+    <main class="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-16">
 
-Essa é a nossa história. E eu quero reviver cada pedacinho dela com você.”
-</p>
-<button @click="startJourney()" class="bg-gradient-to-r from-romance-600 to-romance-700 hover:from-romance-500 hover:to-romance-600 text-white font-medium text-lg px-8 py-4 rounded-full shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-3 mx-auto">
-<span>Reviver nossa história</span>
-<span class="text-xl">❤️</span>
-</button>
-</div>
-</section>
-<!-- CHAPTERS CONTAINER -->
-<template x-if="currentStep !== 'intro'">
-<div class="space-y-12">
-<!-- Navigation Breadcrumb & Progress -->
-<nav class="flex items-center justify-between bg-black/30 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 text-sm">
-<button @click="currentStep = 'intro'" class="text-romance-300 hover:text-white flex items-center gap-1 transition">
-← Início
-</button>
-<div class="text-romance-200 font-medium tracking-wide">
-Capítulo <span x-text="chapterIndex"></span> de 7
-</div>
-<div class="flex gap-2">
-<button @click="prevChapter()" :disabled="chapterIndex === 1" class="px-3 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-40 transition">Anterior</button>
-<button @click="nextChapter()" :disabled="chapterIndex === 7" class="px-3 py-1 rounded bg-romance-600 hover:bg-romance-500 disabled:opacity-40 transition">Próximo</button>
-</div>
-</nav>
-<!-- CHAPTER 1: PRIMEIRO ENCONTRO -->
-<section x-show="chapterIndex === 1" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 1</span>
-<div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 5 de Outubro de 2025</div>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Nosso Primeiro Encontro</h2>
-<div class="grid md:grid-cols-2 gap-8 items-center">
-<div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 bg-romance-50">
-<img src="image.png" alt="Primeiro Encontro - Bruno e Amanda" class="w-full h-80 object-cover object-center transform hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Encontro'">
-</div>
-<div class="space-y-4">
-<p class="text-slate-700 text-lg leading-relaxed">
-“Foi o início de uma jornada, quando comecei a conhecer a pessoa incrível que viria a se tornar tão importante na minha vida. Um encontro que marcou o ponto de partida de tudo o que estamos construindo juntos.”
-</p>
-<div class="pt-4">
-<button @click="chapterIndex = 2" class="bg-romance-600 hover:bg-romance-500 text-white px-6 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
-Avançar para o Primeiro Beijo ➔
-</button>
-</div>
-</div>
-</div>
-</section>
-<!-- CHAPTER 2: PRIMEIRO BEIJO -->
-<section x-show="chapterIndex === 2" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 2</span>
-<div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 6 de Outubro de 2025</div>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Nosso Primeiro Beijo</h2>
-<div class="grid md:grid-cols-2 gap-8 items-center">
-<div class="space-y-4 order-2 md:order-1">
-<div class="bg-romance-50 p-6 rounded-2xl border-l-4 border-romance-500 italic text-slate-800 text-lg leading-relaxed shadow-inner">
-“Minha princesa, nosso primeiro beijo foi um daqueles momentos que ficam guardados na memória. Foi quando tudo começou a ganhar um significado ainda mais especial para mim. Naquele instante, percebi que queria continuar conhecendo você, descobrindo seu jeito, seu carinho e tudo aquilo que faz de você uma pessoa tão especial. Hoje, quando lembro daquele dia, sinto uma felicidade enorme por tudo o que começou ali.”
-</div>
-<button @click="chapterIndex = 3" class="bg-romance-600 hover:bg-romance-500 text-white px-6 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
-Continuar nossa história ➔
-</button>
-</div>
-<div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 bg-romance-50 order-1 md:order-2">
-<img src="image_7.png" alt="Nosso Primeiro Beijo" class="w-full h-80 object-cover object-center transform hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Beijo'">
-</div>
-</div>
-</section>
-<!-- CHAPTER 3: O DIA DO PEDIDO DE NAMORO -->
-<section x-show="chapterIndex === 3" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl text-center">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 3</span>
-<div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 29 de Outubro de 2025</div>
-<h2 class="font-serif text-3xl md:text-5xl font-bold text-romance-900 mb-8">O Pedido de Namoro</h2>
-<div class="max-w-2xl mx-auto space-y-6">
-<div class="text-2xl md:text-3xl font-serif text-romance-700 font-semibold bg-romance-50 py-6 px-8 rounded-2xl border border-romance-200 shadow-sm">
-“<span class="text-romance-600 font-bold underline">Você disse sim</span>”
-</div>
-<p class="text-slate-700 text-lg md:text-xl leading-relaxed">
-“Foi nesse dia que deixamos de ser apenas duas pessoas se conhecendo e começamos oficialmente a escrever nossa história como namorados. Você disse sim, e eu ganhei a oportunidade de viver tantas coisas ao lado de uma pessoa que se tornou tão importante para mim.”
-</p>
-<div class="pt-4 flex justify-center">
-<button @click="chapterIndex = 4" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
-Ver Linha do Tempo da Nossa História ➔
-</button>
-</div>
-</div>
-</section>
-<!-- CHAPTER 4: LINHA DO TEMPO COMPLETA -->
-<section x-show="chapterIndex === 4" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 4</span>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">Nossa Linha do Tempo</h2>
-<p class="text-slate-600 mb-8">Momentos inesquecíveis que construímos juntos ao longo deste ano.</p>
-<div class="relative border-l-2 border-romance-300 ml-4 md:ml-8 space-y-12">
-<!-- Timeline Item 1 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">5 de Outubro de 2025</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Encontro</h3>
-<p class="text-slate-600 mt-1">O início de uma jornada, quando comecei a conhecer a pessoa incrível que mudaria tanta coisa na minha vida.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image.png" alt="Primeiro Encontro" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Encontro'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 2 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">6 de Outubro de 2025</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Beijo</h3>
-<p class="text-slate-600 mt-1">O instante em que percebi que queria você por perto para sempre.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_7.png" alt="Primeiro Beijo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Beijo'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 3 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">29 de Outubro de 2025</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Pedido de Namoro Aceito</h3>
-<p class="text-slate-600 mt-1">O dia em que você disse sim e oficializamos nosso amor.</p>
-</div>
-</div>
-<!-- Timeline Item 4: Novembro de 2025 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Novembro de 2025</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeira Viagem de Moto para Ilha Comprida</h3>
-<p class="text-slate-600 mt-1">Nossa primeira viagem de moto para Ilha Comprida, foi quando você foi pela primeira vez viajar de moto e se apaixonou por viajar de moto!</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_12.png" alt="Viagem Ilha Comprida" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Ilha+Comprida'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 5: Dezembro de 2025 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Dezembro de 2025</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Nosso Primeiro Natal Juntos</h3>
-<p class="text-slate-600 mt-1">Momentos especiais de união e carinho celebrando o nosso primeiro Natal lado a lado.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_11.png" alt="Primeiro Natal Juntos" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Natal+Juntos'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 6: Janeiro de 2026 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Janeiro de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Segunda Viagem de Moto (Via Cabeça da Anta)</h3>
-<p class="text-slate-600 mt-1">Nossa segunda viagem de moto novamente para a Ilha Comprida, porém dessa vez passando pela Cabeça da Anta.</p>
-</div>
-</div>
-<!-- Timeline Item 7: 5 de Abril de 2026 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">5 de Abril de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Seis Meses Juntos</h3>
-<p class="text-slate-600 mt-1">Meio ano de carinho, cumplicidade e muitos sorrisos compartilhados.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_2.png" alt="Seis meses" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Seis+Meses'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 8: Meu Aniversário -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Maio de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Meu Aniversário</h3>
-<p class="text-slate-600 mt-1">Comemoramos juntos, foi uma data muito importante para mim, porque foi o meu aniversário, mas o presente era você.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_3.png" alt="Meu Aniversário" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Meu+Aniversario'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 9: Primeiro Dia dos Namorados -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Junho de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Dia dos Namorados</h3>
-<p class="text-slate-600 mt-1">Nossa data especial celebrada com muito amor e momentos inesquecíveis.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_9.png" alt="Dia dos Namorados" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Dia+dos+Namorados'">
-</div>
-</div>
-</div>
-<!-- Timeline Item 10: Aniversário da Amanda -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Julho de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Seu Aniversário, minha princesa</h3>
-<p class="text-slate-600 mt-1">Comemoramos o seu aniversário. Mais uma vez descemos para a Ilha Comprida e fizemos um vídeo incrível na ilha.</p>
-</div>
-</div>
-<!-- Timeline Item 11 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Agosto de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Cuesta Café em Pardinho</h3>
-<p class="text-slate-600 mt-1">Passeio especial e momentos aconchegantes na charmosa Pardinho.</p>
-</div>
-</div>
-<!-- Timeline Item 12 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Setembro de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Missa em São Miguel</h3>
-<p class="text-slate-600 mt-1">Fé, paz e momentos de agradecimento juntos.</p>
-</div>
-</div>
-<!-- Timeline Item 13 -->
-<div class="relative pl-8 md:pl-10">
-<div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
-<div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
-<span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Outubro de 2026</span>
-<h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Viagem de Moto para o Paraná</h3>
-<p class="text-slate-600 mt-1">Nossa viagem mais longa de moto até agora: saindo de Piraju para Carlópolis e Siqueira Campos.</p>
-<div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
-<img src="image_10.png" alt="Viagem Carlópolis" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Parana'">
-</div>
-</div>
-</div>
-</div>
-<div class="mt-10 flex justify-center">
-<button @click="chapterIndex = 5" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
-Avançar para Nossas Aventuras na Estrada ➔
-</button>
-</div>
-</section>
-<!-- CHAPTER 5: AVENTURAS NA ESTRADA -->
-<section x-show="chapterIndex === 5" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 5</span>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">Nossas Aventuras na Estrada</h2>
-<p class="text-slate-600 mb-6">Caminhos e Destinos.</p>
-<div class="grid md:grid-cols-2 gap-8 items-center mb-8">
-<div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200">
-<img src="image_12.png" alt="Ilha Comprida - Primeira Viagem de Moto" class="w-full h-80 object-cover transform hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Ilha+Comprida'">
-</div>
-<div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200">
-<img src="image_10.png" alt="Carlópolis Paraná" class="w-full h-80 object-cover transform hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Parana'">
-</div>
-</div>
-<div class="bg-romance-50 p-6 rounded-2xl border border-romance-200 shadow-sm mb-8">
-<h3 class="font-serif text-xl font-bold text-romance-900 mb-2">Caminhos e Destinos</h3>
-<p class="text-slate-700 leading-relaxed">
-“Desde a nossa primeira viagem de moto para Ilha Comprida, quando você foi pela primeira vez viajar de moto e se apaixonou por viajar de moto, até realizarmos nossa viagem mais longa de moto neste mês de outubro — saindo de Piraju para Carlópolis e Siqueira Campos, no Paraná —, percebi algo muito especial: a partir dessa viagem mais longa, eu descobri que com você na garupa podemos ir a qualquer lugar desse vasto país ou até mesmo mundão. Não importa apenas o destino, mas as lembranças que construímos pelo caminho.”
-</p>
-</div>
-<div class="flex justify-center pt-4">
-<button @click="chapterIndex = 6" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
-Ver o que eu mais amo em você ➔
-</button>
-</div>
-</section>
-<!-- CHAPTER 6: O QUE EU MAIS AMO EM VOCÊ -->
-<section x-show="chapterIndex === 6" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl text-center">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 6</span>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">O Que Eu Mais Amo em Você</h2>
-<p class="text-slate-600 mb-8">As qualidades que tornam cada dia ao seu lado inesquecível.</p>
-<div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">💖</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Seu Jeito Carinhoso</h3>
-<p class="text-slate-600 text-sm">O cuidado e a ternura em cada gesto que me fazem sentir amado todos os dias.</p>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">✨</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Sua Alegria</h3>
-<p class="text-slate-600 text-sm">O sorriso que ilumina qualquer ambiente e transforma momentos simples em festa.</p>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">💪</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Força e Determinação</h3>
-<p class="text-slate-600 text-sm">Sua garra e coragem diante da vida são inspiração constante para mim.</p>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">🤝</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Companheirismo</h3>
-<p class="text-slate-600 text-sm">Estar junto nas risadas, na estrada e em cada momento da nossa jornada.</p>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">🌟</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Seu Jeito Único</h3>
-<p class="text-slate-600 text-sm">A maneira especial de enxergar a vida e fazer parte do meu mundo.</p>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
-<div class="text-3xl mb-2">❤️</div>
-<h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Amor Verdadeiro</h3>
-<p class="text-slate-600 text-sm">A pessoa real que conheci e continuo descobrindo e amando a cada novo amanhecer.</p>
-</div>
-</div>
-<div class="bg-romance-50 p-6 rounded-2xl border border-romance-200 max-w-2xl mx-auto mb-8 text-left">
-<p class="text-slate-800 italic leading-relaxed">
-“Eu amo conhecer cada detalhe seu, seu jeito de ser, sua alegria, sua força e até essas pequenas manias que fazem você ser exatamente quem é. Não amo uma versão perfeita de você. Amo a pessoa real que conheci e continuo descobrindo a cada dia.”
-</p>
-</div>
-<button @click="chapterIndex = 7" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition inline-flex items-center gap-2">
-Ler a Carta de Amor ➔
-</button>
-</section>
-<!-- CHAPTER 7: CARTA DE AMOR -->
-<section x-show="chapterIndex === 7" x-transition class="glass-card text-slate-900 p-6 md:p-12 rounded-3xl shadow-2xl max-w-3xl mx-auto">
-<span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 7</span>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-6 text-center">Uma Carta para Minha Princesa</h2>
-<div class="bg-amber-50/80 p-8 md:p-12 rounded-2xl shadow-inner border border-amber-200 text-slate-800 space-y-6 font-serif leading-relaxed text-lg">
-<p>Minha princesa,</p>
-<p>
-Quando olho para trás e lembro de tudo o que vivemos desde aquele primeiro encontro, percebo quantas lembranças construímos juntos. Cada momento teve seu valor, desde os primeiros dias em que estávamos nos conhecendo até as aventuras que vivemos como casal.
-</p>
-<p>
-Você se tornou uma pessoa muito importante para mim. Gosto de estar ao seu lado, compartilhar meus planos, conhecer lugares novos e imaginar tudo aquilo que ainda podemos viver.
-</p>
-<p>
-Não quero que nossa história seja feita apenas de grandes acontecimentos, mas também das pequenas coisas do dia a dia, dos momentos simples, das risadas e das lembranças que ainda vamos construir.
-</p>
-<p>
-Obrigado por fazer parte da minha vida e por ter dito sim naquele dia.
-</p>
-<p>
-Se pudesse voltar ao começo, sabendo de tudo o que viveríamos, eu escolheria conhecer você novamente.
-</p>
-<p class="pt-4 font-bold text-romance-800">
-Eu te amo, minha princesa. ❤️
-</p>
-</div>
-<div class="mt-8 flex justify-center">
-<button @click="currentStep = 'final'" class="bg-gradient-to-r from-romance-600 to-romance-700 hover:from-romance-500 hover:to-romance-600 text-white font-medium text-lg px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105">
-Ver Mensagem Final ❤️
-</button>
-</div>
-</section>
-</div>
-</template>
-<!-- FINAL SCREEN -->
-<section x-show="currentStep === 'final'" x-transition class="min-h-[85vh] flex flex-col items-center justify-center text-center py-12">
-<div class="glass-card text-slate-900 p-8 md:p-12 rounded-3xl shadow-2xl max-w-2xl mx-auto border border-romance-200 relative">
-<div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-6 border-4 border-romance-400 shadow-xl bg-romance-50">
-<img src="image_1.png" alt="Bruno e Amanda" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x300/f5d3d3/7c2828?text=Casal'">
-</div>
-<h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Feliz 1 Ano de Namoro!</h2>
-<p class="text-slate-700 text-lg leading-relaxed mb-6">
-“Um ano da nossa história, tantas lembranças para guardar e uma vida inteira de possibilidades pela frente.
+        <!-- WELCOME SCREEN (INTRO) -->
+        <section x-show="currentStep === 'intro'" x-transition class="min-h-[85vh] flex flex-col items-center justify-center text-center">
+            <div class="glass-card text-slate-900 p-8 md:p-12 rounded-3xl shadow-2xl max-w-2xl mx-auto border border-romance-200 relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-romance-200 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+                <div class="inline-block bg-romance-100 text-romance-700 text-xs uppercase tracking-widest px-3 py-1 rounded-full font-semibold mb-6">Comemoração de 1 Ano ❤️</div>
+                <h1 class="font-serif text-3xl md:text-5xl font-bold text-romance-900 mb-6 leading-tight">Bruno & Amanda</h1>
+                <p class="text-slate-700 text-lg md:text-xl leading-relaxed mb-8 font-light">
+                    “Oi, minha princesa.<br><br>
+                    Preparei uma surpresa para você. Hoje eu quero te levar de volta ao começo da nossa história, relembrar os momentos que vivemos e mostrar o quanto cada detalhe foi importante para mim.<br><br>
+                    Essa é a nossa história. E eu quero reviver cada pedacinho dela com você.”
+                </p>
+                <button @click="startJourney()" class="bg-gradient-to-r from-romance-600 to-romance-700 hover:from-romance-500 hover:to-romance-600 text-white font-medium text-lg px-8 py-4 rounded-full shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-3 mx-auto">
+                    <span>Reviver nossa história</span>
+                    <span class="text-xl">❤️</span>
+                </button>
+            </div>
+        </section>
 
+        <!-- CHAPTERS CONTAINER -->
+        <template x-if="currentStep !== 'intro'">
+            <div class="space-y-12">
+                <!-- Navigation Breadcrumb & Progress -->
+                <nav class="flex items-center justify-between bg-black/30 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 text-sm">
+                    <button @click="currentStep = 'intro'" class="text-romance-300 hover:text-white flex items-center gap-1 transition">
+                        ← Início
+                    </button>
+                    <div class="text-romance-200 font-medium tracking-wide">
+                        Capítulo <span x-text="chapterIndex"></span> de 7
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="prevChapter()" :disabled="chapterIndex === 1" class="px-3 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-40 transition">Anterior</button>
+                        <button @click="nextChapter()" :disabled="chapterIndex === 7" class="px-3 py-1 rounded bg-romance-600 hover:bg-romance-500 disabled:opacity-40 transition">Próximo</button>
+                    </div>
+                </nav>
 
-Se o nosso primeiro encontro foi o começo de tudo, quero que cada novo dia seja mais uma oportunidade de continuar escrevendo essa história com você.
+                <!-- CHAPTER 1: PRIMEIRO ENCONTRO -->
+                <section x-show="chapterIndex === 1" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 1</span>
+                    <div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 5 de Outubro de 2025</div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Nosso Primeiro Encontro</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="space-y-3">
+                            <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 bg-romance-50 h-80">
+                                <img :src="photos.ch1" alt="Primeiro Encontro" class="w-full h-full object-cover object-center" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Encontro'">
+                            </div>
+                            <!-- Botão para carregar foto direto do site -->
+                            <label class="block text-center bg-romance-100 hover:bg-romance-200 text-romance-800 text-xs font-semibold py-2 px-4 rounded-xl cursor-pointer transition border border-romance-300">
+                                📁 Alterar Foto do Capítulo 1
+                                <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch1')">
+                            </label>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-slate-700 text-lg leading-relaxed">
+                                “Foi o início de uma jornada, quando comecei a conhecer a pessoa incrível que viria a se tornar tão importante na minha vida. Um encontro que marcou o ponto de partida de tudo o que estamos construindo juntos.”
+                            </p>
+                            <div class="pt-4">
+                                <button @click="chapterIndex = 2" class="bg-romance-600 hover:bg-romance-500 text-white px-6 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
+                                    Avançar para o Primeiro Beijo ➔
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
+                <!-- CHAPTER 2: PRIMEIRO BEIJO -->
+                <section x-show="chapterIndex === 2" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 2</span>
+                    <div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 6 de Outubro de 2025</div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Nosso Primeiro Beijo</h2>
 
-Obrigado por ser minha companheira nessa aventura.
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="space-y-4 order-2 md:order-1">
+                            <div class="bg-romance-50 p-6 rounded-2xl border-l-4 border-romance-500 italic text-slate-800 text-lg leading-relaxed shadow-inner">
+                                “Minha princesa, nosso primeiro beijo foi um daqueles momentos que ficam guardados na memória. Foi quando tudo começou a ganhar um significado ainda mais especial para mim. Naquele instante, percebi que queria continuar conhecendo você, descobrindo seu jeito, seu carinho e tudo aquilo que faz de você uma pessoa tão especial. Hoje, quando lembro daquele dia, sinto uma felicidade enorme por tudo o que começou ali.”
+                            </div>
+                            <button @click="chapterIndex = 3" class="bg-romance-600 hover:bg-romance-500 text-white px-6 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
+                                Continuar nossa história ➔
+                            </button>
+                        </div>
+                        <div class="space-y-3 order-1 md:order-2">
+                            <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 bg-romance-50 h-80">
+                                <img :src="photos.ch2" alt="Primeiro Beijo" class="w-full h-full object-cover object-center" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Beijo'">
+                            </div>
+                            <label class="block text-center bg-romance-100 hover:bg-romance-200 text-romance-800 text-xs font-semibold py-2 px-4 rounded-xl cursor-pointer transition border border-romance-300">
+                                📁 Alterar Foto do Capítulo 2
+                                <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch2')">
+                            </label>
+                        </div>
+                    </div>
+                </section>
 
+                <!-- CHAPTER 3: O PEDIDO DE NAMORO -->
+                <section x-show="chapterIndex === 3" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 3</span>
+                    <div class="mt-4 mb-2 text-sm text-slate-500 font-semibold">📅 29 de Outubro de 2025</div>
+                    <h2 class="font-serif text-3xl md:text-5xl font-bold text-romance-900 mb-8">O Pedido de Namoro</h2>
 
-<strong class="text-romance-700 font-bold">Feliz um ano da nossa história, minha princesa.
-Eu te amo!</strong>”
-</p>
-<div class="bg-romance-50 p-4 rounded-xl border border-romance-200 mb-8 text-romance-800 font-serif font-bold text-lg">
-“Isso não é o fim da nossa história. É só mais um capítulo. ❤️”
-</div>
-<button @click="resetExperience()" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-full font-medium shadow-lg transition transform hover:scale-105">
-Voltar ao começo ↺
-</button>
-</div>
-</section>
-</main>
-<!-- Footer Note -->
-<footer class="text-center py-8 text-xs text-romance-200/60 z-10 relative">
-Feito com todo carinho para Bruno e Amanda. ❤️
-</footer>
-<!-- Alpine.js Application Logic -->
-<script>
-function loveStoryApp() {
-return {
-currentStep: 'intro',
-chapterIndex: 1,
-isPlayingMusic: false,
-startJourney() {
-this.currentStep = 'chapters';
-this.chapterIndex = 1;
-window.scrollTo({ top: 0, behavior: 'smooth' });
-this.tryPlayMusic();
-},
-nextChapter() {
-if (this.chapterIndex < 7) {
-this.chapterIndex++;
-window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-},
-prevChapter() {
-if (this.chapterIndex > 1) {
-this.chapterIndex--;
-window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-},
-resetExperience() {
-this.currentStep = 'intro';
-this.chapterIndex = 1;
-window.scrollTo({ top: 0, behavior: 'smooth' });
-},
-toggleMusic() {
-const audio = document.getElementById('bgMusic');
-if (this.isPlayingMusic) {
-audio.pause();
-this.isPlayingMusic = false;
-} else {
-audio.play().then(() => {
-this.isPlayingMusic = true;
-}).catch(e => {
-console.log("Audio play blocked or unavailable", e);
-});
-}
-},
-tryPlayMusic() {
-const audio = document.getElementById('bgMusic');
-audio.play().then(() => {
-this.isPlayingMusic = true;
-}).catch(e => {
-console.log("Autoplay waiting for user interaction");
-});
-}
-}
-}
-</script>
+                    <div class="max-w-2xl mx-auto space-y-6">
+                        <div class="text-2xl md:text-3xl font-serif text-romance-700 font-semibold bg-romance-50 py-6 px-8 rounded-2xl border border-romance-200 shadow-sm">
+                            “<span class="text-romance-600 font-bold underline">Você disse sim</span>”
+                        </div>
+                        <p class="text-slate-700 text-lg md:text-xl leading-relaxed">
+                            “Foi nesse dia que deixamos de ser apenas duas pessoas se conhecendo e começamos oficialmente a escrever nossa história como namorados. Você disse sim, e eu ganhei a oportunidade de viver tantas coisas ao lado de uma pessoa que se tornou tão importante para mim.”
+                        </p>
+                        <div class="pt-4 flex justify-center">
+                            <button @click="chapterIndex = 4" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
+                                Ver Linha do Tempo da Nossa História ➔
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CHAPTER 4: LINHA DO TEMPO COMPLETA -->
+                <section x-show="chapterIndex === 4" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 4</span>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">Nossa Linha do Tempo</h2>
+                    <p class="text-slate-600 mb-8">Momentos inesquecíveis que construímos juntos ao longo deste ano.</p>
+
+                    <div class="relative border-l-2 border-romance-300 ml-4 md:ml-8 space-y-12">
+                        <!-- Timeline Item 1 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">5 de Outubro de 2025</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Encontro</h3>
+                                <p class="text-slate-600 mt-1">O início de uma jornada, quando comecei a conhecer a pessoa incrível que mudaria tanta coisa na minha vida.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch1" alt="Primeiro Encontro" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Encontro'">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 2 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">6 de Outubro de 2025</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Beijo</h3>
+                                <p class="text-slate-600 mt-1">O instante em que percebi que queria você por perto para sempre.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch2" alt="Primeiro Beijo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Primeiro+Beijo'">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 3 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">29 de Outubro de 2025</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Pedido de Namoro Aceito</h3>
+                                <p class="text-slate-600 mt-1">O dia em que você disse sim e oficializamos nosso amor.</p>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 4 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Novembro de 2025</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeira Viagem de Moto para Ilha Comprida</h3>
+                                <p class="text-slate-600 mt-1">Nossa primeira viagem de moto para Ilha Comprida, foi quando você foi pela primeira vez viajar de moto e se apaixonou por viajar de moto!</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_moto" alt="Viagem Ilha Comprida" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Ilha+Comprida'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto desta Viagem
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_moto')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 5 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Dezembro de 2025</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Nosso Primeiro Natal Juntos</h3>
+                                <p class="text-slate-600 mt-1">Momentos especiais de união e carinho celebrando o nosso primeiro Natal lado a lado.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_natal" alt="Primeiro Natal Juntos" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Natal+Juntos'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto do Natal
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_natal')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 7 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">5 de Abril de 2026</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Seis Meses Juntos</h3>
+                                <p class="text-slate-600 mt-1">Meio ano de carinho, cumplicidade e muitos sorrisos compartilhados.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_seis" alt="Seis meses" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Seis+Meses'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto (6 Meses)
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_seis')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 8 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Maio de 2026</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Meu Aniversário</h3>
+                                <p class="text-slate-600 mt-1">Comemoramos juntos, foi uma data muito importante para mim, porque foi o meu aniversário, mas o presente era você.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_aniver" alt="Meu Aniversário" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Meu+Aniversario'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto do Aniversário
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_aniver')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 9 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Junho de 2026</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Primeiro Dia dos Namorados</h3>
+                                <p class="text-slate-600 mt-1">Nossa data especial celebrada com muito amor e momentos inesquecíveis.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_diadosnamorados" alt="Dia dos Namorados" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Dia+dos+Namorados'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto (Dia dos Namorados)
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_diadosnamorados')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 13 -->
+                        <div class="relative pl-8 md:pl-10">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-romance-600 border-4 border-white shadow"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md border border-romance-100">
+                                <span class="text-xs font-bold text-romance-600 bg-romance-50 px-2.5 py-1 rounded">Outubro de 2026</span>
+                                <h3 class="font-serif text-xl font-bold text-slate-900 mt-2">Viagem de Moto para o Paraná</h3>
+                                <p class="text-slate-600 mt-1">Nossa viagem mais longa de moto até agora: saindo de Piraju para Carlópolis e Siqueira Campos.</p>
+                                <div class="mt-4 rounded-xl overflow-hidden h-48 border border-romance-100">
+                                    <img :src="photos.ch4_parana" alt="Viagem Carlópolis" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Parana'">
+                                </div>
+                                <label class="mt-2 block text-center bg-romance-50 hover:bg-romance-100 text-romance-800 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-pointer transition border border-romance-200">
+                                    📁 Alterar Foto (Viagem Paraná)
+                                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_parana')">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 flex justify-center">
+                        <button @click="chapterIndex = 5" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
+                            Avançar para Nossas Aventuras na Estrada ➔
+                        </button>
+                    </div>
+                </section>
+
+                <!-- CHAPTER 5: AVENTURAS NA ESTRADA -->
+                <section x-show="chapterIndex === 5" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 5</span>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">Nossas Aventuras na Estrada</h2>
+                    <p class="text-slate-600 mb-6">Caminhos e destinos: desde a nossa primeira viagem de moto para Ilha Comprida até realizarmos nossa viagem mais longa neste mês de outubro — saindo de Piraju, passando por Carlópolis e Siqueira Campos, no Paraná.</p>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
+                        <div class="space-y-3">
+                            <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 h-80">
+                                <img :src="photos.ch4_moto" alt="Ilha Comprida" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Ilha+Comprida'">
+                            </div>
+                            <label class="block text-center bg-romance-100 hover:bg-romance-200 text-romance-800 text-xs font-semibold py-2 px-4 rounded-xl cursor-pointer transition border border-romance-300">
+                                📁 Alterar Foto (Ilha Comprida)
+                                <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_moto')">
+                            </label>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-romance-200 h-80">
+                                <img :src="photos.ch4_parana" alt="Paraná" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/f5d3d3/7c2828?text=Parana'">
+                            </div>
+                            <label class="block text-center bg-romance-100 hover:bg-romance-200 text-romance-800 text-xs font-semibold py-2 px-4 rounded-xl cursor-pointer transition border border-romance-300">
+                                📁 Alterar Foto (Paraná)
+                                <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'ch4_parana')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-romance-50 p-6 rounded-2xl border border-romance-200 shadow-sm mb-8">
+                        <h3 class="font-serif text-xl font-bold text-romance-900 mb-2">Caminhos e Destinos Juntos</h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            “Desde a nossa primeira viagem de moto para Ilha Comprida, quando você foi pela primeira vez viajar de moto e se apaixonou por viajar de moto, até realizarmos nossa viagem mais longa de moto neste mês de outubro — saindo de Piraju para Carlópolis e Siqueira Campos, no Paraná —, percebi algo muito especial: a partir dessa viagem mais longa, eu descobri que com você na garupa podemos ir a qualquer lugar desse vasto país ou até mesmo mundão. Não importa apenas o destino, mas as lembranças que construímos pelo caminho.”
+                        </p>
+                    </div>
+
+                    <div class="flex justify-center pt-4">
+                        <button @click="chapterIndex = 6" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition flex items-center gap-2">
+                            Ver o que eu mais amo em você ➔
+                        </button>
+                    </div>
+                </section>
+
+                <!-- CHAPTER 6: O QUE EU MAIS AMO EM VOCÊ -->
+                <section x-show="chapterIndex === 6" x-transition class="glass-card text-slate-900 p-6 md:p-10 rounded-3xl shadow-2xl text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 6</span>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-2">O Que Eu Mais Amo em Você</h2>
+                    <p class="text-slate-600 mb-8">As qualidades que tornam cada dia ao seu lado inesquecível.</p>
+
+                    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">💖</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Seu Jeito Carinhoso</h3>
+                            <p class="text-slate-600 text-sm">O cuidado e a ternura em cada gesto que me fazem sentir amado todos os dias.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">✨</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Sua Alegria</h3>
+                            <p class="text-slate-600 text-sm">O sorriso que ilumina qualquer ambiente e transforma momentos simples em festa.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">💪</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Força e Determinação</h3>
+                            <p class="text-slate-600 text-sm">Sua garra e coragem diante da vida são inspiração constante para mim.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">🤝</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Companheirismo</h3>
+                            <p class="text-slate-600 text-sm">Estar junto nas risadas, na estrada e em cada momento da nossa jornada.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">🌟</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Seu Jeito Único</h3>
+                            <p class="text-slate-600 text-sm">A maneira especial de enxergar a vida e fazer parte do meu mundo.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow border border-romance-100 transform hover:-translate-y-1 transition">
+                            <div class="text-3xl mb-2">❤️</div>
+                            <h3 class="font-serif font-bold text-slate-900 text-lg mb-1">Amor Verdadeiro</h3>
+                            <p class="text-slate-600 text-sm">A pessoa real que conheci e continuo descobrindo e amando a cada novo amanhecer.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-romance-50 p-6 rounded-2xl border border-romance-200 max-w-2xl mx-auto mb-8 text-left">
+                        <p class="text-slate-800 italic leading-relaxed">
+                            “Eu amo conhecer cada detalhe seu, seu jeito de ser, sua alegria, sua força e até essas pequenas manias que fazem você ser exatamente quem é. Não amo uma versão perfeita de você. Amo a pessoa real que conheci e continuo descobrindo a cada dia.”
+                        </p>
+                    </div>
+
+                    <button @click="chapterIndex = 7" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-xl font-medium shadow transition inline-flex items-center gap-2">
+                        Ler a Carta de Amor ➔
+                    </button>
+                </section>
+
+                <!-- CHAPTER 7: CARTA DE AMOR -->
+                <section x-show="chapterIndex === 7" x-transition class="glass-card text-slate-900 p-6 md:p-12 rounded-3xl shadow-2xl max-w-3xl mx-auto">
+                    <span class="text-xs font-bold uppercase tracking-widest text-romance-600 bg-romance-100 px-3 py-1 rounded-full">Capítulo 7</span>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mt-4 mb-6 text-center">Uma Carta para Minha Princesa</h2>
+
+                    <div class="bg-amber-50/80 p-8 md:p-12 rounded-2xl shadow-inner border border-amber-200 text-slate-800 space-y-6 font-serif leading-relaxed text-lg">
+                        <p>Minha princesa,</p>
+                        <p>
+                            Quando olho para trás e lembro de tudo o que vivemos desde aquele primeiro encontro, percebo quantas lembranças construímos juntos. Cada momento teve seu valor, desde os primeiros dias em que estávamos nos conhecendo até as aventuras que vivemos como casal.
+                        </p>
+                        <p>
+                            Você se tornou uma pessoa muito importante para mim. Gosto de estar ao seu lado, compartilhar meus planos, conhecer lugares novos e imaginar tudo aquilo que ainda podemos viver.
+                        </p>
+                        <p>
+                            Não quero que nossa história seja feita apenas de grandes acontecimentos, mas também das pequenas coisas do dia a dia, dos momentos simples, das risadas e das lembranças que ainda vamos construir.
+                        </p>
+                        <p>
+                            Obrigado por fazer parte da minha vida e por ter dito sim naquele dia.
+                        </p>
+                        <p>
+                            Se pudesse voltar ao começo, sabendo de tudo o que viveríamos, eu escolheria conhecer você novamente.
+                        </p>
+                        <p class="pt-4 font-bold text-romance-800">
+                            Eu te amo, minha princesa. ❤️
+                        </p>
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button @click="currentStep = 'final'" class="bg-gradient-to-r from-romance-600 to-romance-700 hover:from-romance-500 hover:to-romance-600 text-white font-medium text-lg px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105">
+                            Ver Mensagem Final ❤️
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </template>
+
+        <!-- FINAL SCREEN -->
+        <section x-show="currentStep === 'final'" x-transition class="min-h-[85vh] flex flex-col items-center justify-center text-center py-12">
+            <div class="glass-card text-slate-900 p-8 md:p-12 rounded-3xl shadow-2xl max-w-2xl mx-auto border border-romance-200 relative">
+                <div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-6 border-4 border-romance-400 shadow-xl bg-romance-50">
+                    <img :src="photos.final" alt="Bruno e Amanda" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x300/f5d3d3/7c2828?text=Casal'">
+                </div>
+                <label class="mb-6 block text-center bg-romance-100 hover:bg-romance-200 text-romance-800 text-xs font-semibold py-2 px-4 rounded-xl cursor-pointer transition border border-romance-300 max-w-xs mx-auto">
+                    📁 Alterar Foto Final
+                    <input type="file" accept="image/*" class="hidden" @change="loadPhoto($event, 'final')">
+                </label>
+
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-romance-900 mb-6">Feliz 1 Ano de Namoro!</h2>
+                
+                <p class="text-slate-700 text-lg leading-relaxed mb-6">
+                    “Um ano da nossa história, tantas lembranças para guardar e uma vida inteira de possibilidades pela frente.<br><br>
+                    Se o nosso primeiro encontro foi o começo de tudo, quero que cada novo dia seja mais uma oportunidade de continuar escrevendo essa história com você.<br><br>
+                    Obrigado por ser minha companheira nessa aventura.<br><br>
+                    <strong class="text-romance-700 font-bold">Feliz um ano da nossa história, minha princesa.<br>Eu te amo!</strong>”
+                </p>
+
+                <div class="bg-romance-50 p-4 rounded-xl border border-romance-200 mb-8 text-romance-800 font-serif font-bold text-lg">
+                    “Isso não é o fim da nossa história. É só mais um capítulo. ❤️”
+                </div>
+
+                <button @click="resetExperience()" class="bg-romance-600 hover:bg-romance-500 text-white px-8 py-3 rounded-full font-medium shadow-lg transition transform hover:scale-105">
+                    Voltar ao começo ↺
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Note -->
+    <footer class="text-center py-8 text-xs text-romance-200/60 z-10 relative">
+        Feito com todo carinho para Bruno e Amanda. ❤️
+    </footer>
+
+    <!-- Alpine.js Application Logic -->
+    <script>
+        function loveStoryApp() {
+            return {
+                currentStep: 'intro',
+                chapterIndex: 1,
+                isPlayingMusic: false,
+                // Objeto que armazena os links/arquivos de cada foto no navegador
+                photos: {
+                    ch1: 'image.png',
+                    ch2: 'image_7.png',
+                    ch4_moto: 'image_12.png',
+                    ch4_natal: 'image_11.png',
+                    ch4_seis: 'image_2.png',
+                    ch4_aniver: 'image_3.png',
+                    ch4_diadosnamorados: 'image_9.png',
+                    ch4_parana: 'image_10.png',
+                    final: 'image_1.png'
+                },
+                // Função mágica que lê a foto escolhida no celular e joga na tela na hora
+                loadPhoto(event, key) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.photos[key] = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                startJourney() {
+                    this.currentStep = 'chapters';
+                    this.chapterIndex = 1;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    this.tryPlayMusic();
+                },
+                nextChapter() {
+                    if (this.chapterIndex < 7) {
+                        this.chapterIndex++;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+                prevChapter() {
+                    if (this.chapterIndex > 1) {
+                        this.chapterIndex--;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+                resetExperience() {
+                    this.currentStep = 'intro';
+                    this.chapterIndex = 1;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                toggleMusic() {
+                    const audio = document.getElementById('bgMusic');
+                    if (this.isPlayingMusic) {
+                        audio.pause();
+                        this.isPlayingMusic = false;
+                    } else {
+                        audio.play().then(() => {
+                            this.isPlayingMusic = true;
+                        }).catch(e => {
+                            console.log("Audio play blocked or unavailable", e);
+                        });
+                    }
+                },
+                tryPlayMusic() {
+                    const audio = document.getElementById('bgMusic');
+                    audio.play().then(() => {
+                        this.isPlayingMusic = true;
+                    }).catch(e => {
+                        console.log("Autoplay waiting for user interaction");
+                    });
+                }
+            }
+        }
+    </script>
 </body>
 </html>
